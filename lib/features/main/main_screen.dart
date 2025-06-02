@@ -6,7 +6,7 @@ import 'package:habitsync/features/stats/screen/stats_screen.dart';
 import 'package:habitsync/features/stats/widgets/bottom_navigation_bar.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({super.key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();

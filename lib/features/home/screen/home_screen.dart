@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/core/color/colors.dart';
-import 'package:habitsync/core/color/strings.dart';
-import 'package:habitsync/core/utils/constants.dart';
 import 'package:habitsync/data/dummy_task_data.dart';
 import 'package:habitsync/features/home/widgets/appBar.dart';
-import 'package:habitsync/features/home/widgets/overlapping_avatars.dart';
 import 'package:habitsync/features/home/widgets/streak_indicator.dart';
 import 'package:habitsync/features/home/widgets/tab_indicator.dart';
 import 'package:habitsync/features/home/widgets/task_card.dart';
-import 'package:habitsync/widgets/glass/glass_morphism.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

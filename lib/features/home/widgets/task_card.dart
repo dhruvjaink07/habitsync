@@ -8,7 +8,7 @@ class TaskCard extends StatelessWidget {
   final TaskModel task;
   double heigth;
 
-  TaskCard({required this.task, required this.heigth});
+  TaskCard({super.key, required this.task, required this.heigth});
   @override
   Widget build(BuildContext context) {
     return Padding(

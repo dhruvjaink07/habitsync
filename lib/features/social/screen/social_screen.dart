@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SocialScreen extends StatelessWidget {
-  const SocialScreen({Key? key}) : super(key: key);
+  const SocialScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

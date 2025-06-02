@@ -21,11 +21,11 @@ class HS_AppBar extends StatelessWidget {
               children: [
                 Text(
                   AppStrings.greet,
-                  style: TextStyle(fontSize: AppTextSizes.bodyLarge),
+                  style: const TextStyle(fontSize: AppTextSizes.bodyLarge),
                 ),
                 Text(
                   AppStrings.username,
-                  style: TextStyle(fontSize: AppTextSizes.bodyLarge),
+                  style: const TextStyle(fontSize: AppTextSizes.bodyLarge),
                 )
               ],
             )

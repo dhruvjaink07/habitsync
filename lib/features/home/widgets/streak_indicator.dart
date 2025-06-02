@@ -45,7 +45,7 @@ class StreakIndicator extends StatelessWidget {
               color: AppColors.progressGreen,
               size: screenWidth * 0.10,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               '7', // Example streak count
               style: TextStyle(
@@ -54,7 +54,7 @@ class StreakIndicator extends StatelessWidget {
                 color: isDark ? AppColors.headingDark : AppColors.headingLight,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               'Day Streak',
               style: TextStyle(

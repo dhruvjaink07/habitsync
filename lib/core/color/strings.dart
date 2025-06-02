@@ -1,7 +1,7 @@
 class AppStrings {
-  static final greet = 'Good Morning';
-  static final username = 'Alex';
-  static final allStreaks = 'All';
-  static final personal = 'Personal';
-  static final shared = 'Shared';
+  static const greet = 'Good Morning';
+  static const username = 'Alex';
+  static const allStreaks = 'All';
+  static const personal = 'Personal';
+  static const shared = 'Shared';
 }
