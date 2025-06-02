@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/core/theme/theme.dart';
+import 'package:habitsync/features/habits/screens/add_habit_screen.dart';
 import 'package:habitsync/features/main/main_screen.dart';
 
 void main() {
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: AppThemes.lightTheme,
       darkTheme: AppThemes.darkTheme,
       themeMode: ThemeMode.system,
-      home: const MainScreen(),
+      home: const AddHabitScreen(),
     );
   }
 }

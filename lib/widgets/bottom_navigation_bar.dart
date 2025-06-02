@@ -27,6 +27,7 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
         : AppColors.lightBackgroundGradient;
 
     return GlassMorphism(
+      borderRadius: 0,
       start: 0.3,
       end: 0.2,
       child: Container(

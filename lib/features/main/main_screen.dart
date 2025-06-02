@@ -3,7 +3,7 @@ import 'package:habitsync/features/home/screen/home_screen.dart';
 import 'package:habitsync/features/profile/screen/profile_screen.dart';
 import 'package:habitsync/features/social/screen/social_screen.dart';
 import 'package:habitsync/features/stats/screen/stats_screen.dart';
-import 'package:habitsync/features/stats/widgets/bottom_navigation_bar.dart';
+import 'package:habitsync/widgets/bottom_navigation_bar.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
