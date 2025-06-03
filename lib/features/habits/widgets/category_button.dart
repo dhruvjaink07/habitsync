@@ -7,6 +7,7 @@ class CategoryButton extends StatelessWidget {
   final Color? color;
   final VoidCallback? onTap;
   const CategoryButton({
+    super.key,
     required this.label,
     required this.icon,
     this.selected = false,

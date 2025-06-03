@@ -16,6 +16,7 @@ class ReminderCollaboratorsPermissionSection extends StatelessWidget {
   final ThemeData theme;
 
   const ReminderCollaboratorsPermissionSection({
+    super.key,
     required this.cardColor,
     required this.textColor,
     required this.subTextColor,

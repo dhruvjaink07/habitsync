@@ -9,29 +9,29 @@ class HS_AppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            const CircleAvatar(),
-            const SizedBox(width: 8),
+            CircleAvatar(),
+            SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   AppStrings.greet,
-                  style: const TextStyle(fontSize: AppTextSizes.bodyLarge),
+                  style: TextStyle(fontSize: AppTextSizes.bodyLarge),
                 ),
                 Text(
                   AppStrings.username,
-                  style: const TextStyle(fontSize: AppTextSizes.bodyLarge),
+                  style: TextStyle(fontSize: AppTextSizes.bodyLarge),
                 )
               ],
             )
           ],
         ),
-        const Icon(
+        Icon(
           Icons.notifications_outlined,
           color: Colors.white,
           weight: 0.1,

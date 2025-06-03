@@ -8,6 +8,7 @@ class SectionRow extends StatelessWidget {
   final Color? subTextColor;
   final bool showArrow;
   const SectionRow({
+    super.key,
     required this.icon,
     required this.title,
     required this.value,

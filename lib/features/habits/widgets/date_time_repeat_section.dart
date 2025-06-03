@@ -18,6 +18,7 @@ class DateTimeRepeatSection extends StatelessWidget {
   final ThemeData theme;
 
   const DateTimeRepeatSection({
+    super.key,
     required this.cardColor,
     required this.textColor,
     required this.subTextColor,

@@ -6,7 +6,11 @@ class ChipButton extends StatelessWidget {
   final Color? color;
   final VoidCallback? onTap;
   const ChipButton(
-      {required this.label, this.selected = false, this.color, this.onTap});
+      {super.key,
+      required this.label,
+      this.selected = false,
+      this.color,
+      this.onTap});
 
   @override
   Widget build(BuildContext context) {

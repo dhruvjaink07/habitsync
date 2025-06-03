@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class EmojiDot extends StatelessWidget {
   final String emoji;
   final bool selected;
-  const EmojiDot(this.emoji, {this.selected = false});
+  const EmojiDot(this.emoji, {super.key, this.selected = false});
 
   @override
   Widget build(BuildContext context) {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ColorDot extends StatelessWidget {
   final Color color;
   final bool selected;
-  const ColorDot({required this.color, this.selected = false});
+  const ColorDot({super.key, required this.color, this.selected = false});
 
   @override
   Widget build(BuildContext context) {

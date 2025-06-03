@@ -105,7 +105,7 @@ class HomeScreen extends StatelessWidget {
               MaterialPageRoute(builder: (context) => const AddHabitScreen()));
         },
         backgroundColor: isDark ? AppColors.secondary : AppColors.primary,
-        child: const Icon(Icons.edit, size: 28),
+        child: const Icon(Icons.add, size: 28),
       ),
     );
   }
