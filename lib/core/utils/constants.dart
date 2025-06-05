@@ -10,4 +10,12 @@ class AppTextSizes {
   static const double caption = 10.0;
   static const double iconMedium = 28;
   static const double iconLarge = 38;
+
+  static final RegExp emailRegex = RegExp(
+    r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$",
+  );
+
+  static bool isValidPassword(String password, {int minLength = 8}) {
+    return password.length >= minLength;
+  }
 }

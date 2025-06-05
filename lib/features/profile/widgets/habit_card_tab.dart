@@ -4,6 +4,8 @@ import 'package:habitsync/features/profile/widgets/habit_display_card.dart';
 
 // Habits Tab Widget (responsive)
 class HabitsTab extends StatelessWidget {
+  const HabitsTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -19,30 +21,30 @@ class HabitsTab extends StatelessWidget {
             crossAxisSpacing: 16,
             childAspectRatio: 1.2,
             children: [
-              HabitCard(
+              const HabitCard(
                 title: 'Morning Meditation',
                 progress: '12/30 days',
                 time: '7:00 AM',
-                avatars: const [
+                avatars: [
                   'https://randomuser.me/api/portraits/men/1.jpg',
                   'https://randomuser.me/api/portraits/women/2.jpg',
                   'https://randomuser.me/api/portraits/men/3.jpg',
                 ],
               ),
-              HabitCard(
+              const HabitCard(
                 title: 'Read Books',
                 progress: '8/30 days',
                 time: '8:00 PM',
-                avatars: const [
+                avatars: [
                   'https://randomuser.me/api/portraits/women/4.jpg',
                   'https://randomuser.me/api/portraits/men/5.jpg',
                 ],
               ),
-              HabitCard(
+              const HabitCard(
                 title: 'Exercise',
                 progress: '15/30 days',
                 time: '6:00 AM',
-                avatars: const [
+                avatars: [
                   'https://randomuser.me/api/portraits/men/6.jpg',
                   'https://randomuser.me/api/portraits/women/7.jpg',
                 ],
@@ -54,7 +56,7 @@ class HabitsTab extends StatelessWidget {
                   color: theme.dividerColor,
                   borderType: BorderType.RRect,
                   radius: const Radius.circular(16),
-                  dashPattern: [6, 3],
+                  dashPattern: const [6, 3],
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

@@ -29,7 +29,7 @@ class TabIndicator extends StatelessWidget {
         unselectedLabelColor:
             isDark ? AppColors.subtextDark : AppColors.subtextLight,
         indicatorSize: TabBarIndicatorSize.tab,
-        tabs: [
+        tabs: const [
           Tab(
             text: AppStrings.allStreaks,
           ),

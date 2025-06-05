@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/data/dummy_task_data.dart';
-import 'package:habitsync/features/habits/screens/add_habit_screen.dart';
 import 'package:habitsync/features/home/widgets/appBar.dart';
 import 'package:habitsync/features/home/widgets/streak_indicator.dart';
 import 'package:habitsync/features/home/widgets/tab_indicator.dart';
@@ -98,14 +97,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const AddHabitScreen()));
-        },
-        backgroundColor: isDark ? AppColors.secondary : AppColors.primary,
-        child: const Icon(Icons.add, size: 28),
       ),
     );
   }

@@ -68,11 +68,11 @@ class ReminderCollaboratorsPermissionSection extends StatelessWidget {
               const Spacer(),
               Row(
                 children: [
-                  Avatar(),
+                  const Avatar(),
                   const SizedBox(width: 4),
-                  Avatar(),
+                  const Avatar(),
                   const SizedBox(width: 4),
-                  Avatar(),
+                  const Avatar(),
                   const SizedBox(width: 4),
                   CircleAvatar(
                     radius: 14,

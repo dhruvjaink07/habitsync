@@ -3,6 +3,8 @@ import 'package:habitsync/features/profile/widgets/friend_card.dart';
 
 // FRIENDS TAB
 class FriendsTab extends StatelessWidget {
+  const FriendsTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -30,14 +32,14 @@ class FriendsTab extends StatelessWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.secondary,
                   padding: EdgeInsets.zero,
-                  minimumSize: Size(0, 0),
+                  minimumSize: const Size(0, 0),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          FriendCard(
+          const FriendCard(
             avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
             name: 'Emma Wilson',
             username: '@emmaw',
@@ -45,7 +47,7 @@ class FriendsTab extends StatelessWidget {
             timeAgo: '2m ago',
           ),
           const SizedBox(height: 8),
-          FriendCard(
+          const FriendCard(
             avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
             name: 'Michael Chen',
             username: '@mchen',

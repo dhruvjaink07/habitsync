@@ -66,7 +66,7 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
               onPressed: () => widget.onTap(0),
             ),
             IconButton(
-              icon: Icon(Icons.bar_chart_outlined,
+              icon: Icon(Icons.add,
                   size: AppTextSizes.iconLarge,
                   color: widget.selectedIndex == 1
                       ? (widget.isDark
@@ -77,20 +77,8 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
                           : AppColors.subtextLight)),
               onPressed: () => widget.onTap(1),
             ),
-            // IconButton(
-            //   icon: Icon(Icons.groups_outlined,
-            //       size: AppTextSizes.iconLarge,
-            //       color: widget.selectedIndex == 2
-            //           ? (widget.isDark
-            //               ? AppColors.primary
-            //               : AppColors.secondary)
-            //           : (widget.isDark
-            //               ? AppColors.subtextDark
-            //               : AppColors.subtextLight)),
-            //   onPressed: () => widget.onTap(2),
-            // ),
             IconButton(
-              icon: Icon(Icons.person_outline,
+              icon: Icon(Icons.bar_chart_outlined,
                   size: AppTextSizes.iconLarge,
                   color: widget.selectedIndex == 2
                       ? (widget.isDark
@@ -100,6 +88,18 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
                           ? AppColors.subtextDark
                           : AppColors.subtextLight)),
               onPressed: () => widget.onTap(2),
+            ),
+            IconButton(
+              icon: Icon(Icons.person_outline,
+                  size: AppTextSizes.iconLarge,
+                  color: widget.selectedIndex == 3
+                      ? (widget.isDark
+                          ? AppColors.primary
+                          : AppColors.secondary)
+                      : (widget.isDark
+                          ? AppColors.subtextDark
+                          : AppColors.subtextLight)),
+              onPressed: () => widget.onTap(3),
             ),
           ],
         ),

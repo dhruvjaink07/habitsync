@@ -3,6 +3,8 @@ import 'package:habitsync/features/profile/widgets/achievement_card.dart';
 
 // ACHIEVEMENTS TAB
 class AchievementsTab extends StatelessWidget {
+  const AchievementsTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

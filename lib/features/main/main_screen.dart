@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:habitsync/features/habits/screens/add_habit_screen.dart';
 import 'package:habitsync/features/home/screen/home_screen.dart';
 import 'package:habitsync/features/profile/screen/profile_screen.dart';
-import 'package:habitsync/features/social/screen/social_screen.dart';
 import 'package:habitsync/features/stats/screen/stats_screen.dart';
 import 'package:habitsync/widgets/bottom_navigation_bar.dart';
 
@@ -17,8 +17,8 @@ class _MainScreenState extends State<MainScreen> {
 
   static const List<Widget> _pages = <Widget>[
     HomeScreen(),
+    AddHabitScreen(),
     StatsScreen(),
-    // SocialScreen(),
     ProfileScreen()
   ];
 

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/features/habits/widgets/category_button.dart';
-import 'package:habitsync/features/habits/widgets/chip_button.dart';
 import 'package:habitsync/features/habits/widgets/color_emoji_section.dart';
 import 'package:habitsync/features/habits/widgets/date_time_repeat_section.dart';
 import 'package:habitsync/features/habits/widgets/reminder_collaborator_section.dart';
-import 'package:habitsync/features/habits/widgets/section_row.dart';
 
 class AddHabitScreen extends StatefulWidget {
   const AddHabitScreen({super.key});

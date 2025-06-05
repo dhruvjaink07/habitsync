@@ -23,7 +23,7 @@ class HabitCard extends StatelessWidget {
     final subTextColor = theme.textTheme.bodyMedium?.color ?? Colors.white70;
 
     // Show max 3 avatars, rest as +N
-    final maxAvatars = 3;
+    const maxAvatars = 3;
     final extra = avatars.length > maxAvatars ? avatars.length - maxAvatars : 0;
     final shownAvatars = avatars.take(maxAvatars).toList();
 

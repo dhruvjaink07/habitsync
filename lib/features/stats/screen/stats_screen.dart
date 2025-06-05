@@ -28,14 +28,14 @@ class StatsScreen extends StatelessWidget {
           // Top stats row
           Row(
             children: [
-              _StatCard(
+              const _StatCard(
                 icon: Icons.local_fire_department,
                 iconColor: Colors.deepOrange,
                 value: '21',
                 label: 'Day Streak',
               ),
               const SizedBox(width: 16),
-              _StatCard(
+              const _StatCard(
                 icon: Icons.circle_outlined,
                 iconColor: Colors.blue,
                 value: '89%',
@@ -55,7 +55,7 @@ class StatsScreen extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
-          _WeeklyBarChart(),
+          const _WeeklyBarChart(),
           const SizedBox(height: 32),
           // Your Habits
           const Text(
@@ -63,28 +63,28 @@ class StatsScreen extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
-          _HabitProgressCard(
+          const _HabitProgressCard(
             icon: Icons.directions_run,
             iconColor: Colors.deepPurple,
             title: 'Morning Run',
             streak: 12,
             percent: 0.85,
           ),
-          _HabitProgressCard(
+          const _HabitProgressCard(
             icon: Icons.spa,
             iconColor: Colors.green,
             title: 'Meditation',
             streak: 21,
             percent: 0.92,
           ),
-          _HabitProgressCard(
+          const _HabitProgressCard(
             icon: Icons.menu_book,
             iconColor: Colors.orange,
             title: 'Reading',
             streak: 8,
             percent: 0.75,
           ),
-          _HabitProgressCard(
+          const _HabitProgressCard(
             icon: Icons.water,
             iconColor: Colors.blue,
             title: 'Water Intake',
