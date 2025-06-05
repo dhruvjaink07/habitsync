@@ -6,7 +6,6 @@ import 'package:habitsync/features/auth/widgets/button_divider.dart';
 import 'package:habitsync/features/auth/widgets/google_sign_in_button.dart';
 import 'package:habitsync/features/auth/widgets/submit_button.dart';
 import 'package:habitsync/features/auth/widgets/secure_text_fields.dart';
-import 'package:habitsync/widgets/glass/glass_morphism.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

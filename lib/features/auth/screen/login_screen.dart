@@ -6,7 +6,6 @@ import 'package:habitsync/features/auth/widgets/button_divider.dart';
 import 'package:habitsync/features/auth/widgets/google_sign_in_button.dart';
 import 'package:habitsync/features/auth/widgets/secure_text_fields.dart';
 import 'package:habitsync/features/auth/widgets/submit_button.dart';
-import 'package:habitsync/widgets/glass/glass_morphism.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

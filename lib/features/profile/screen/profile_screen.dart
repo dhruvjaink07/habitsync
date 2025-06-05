@@ -136,7 +136,7 @@ class ProfileScreen extends StatelessWidget {
                   Tab(text: 'Achievements'),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 400, // Adjust as needed
                 child: TabBarView(
                   children: [
