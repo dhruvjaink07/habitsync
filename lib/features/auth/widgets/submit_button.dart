@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/core/color/colors.dart';
+import 'package:habitsync/features/main/main_screen.dart';
+import 'package:habitsync/features/onboarding/screens/on_boarding_screen.dart';
+import 'package:habitsync/services/app_preferences.dart';
 
 class SubmitButton extends StatelessWidget {
   const SubmitButton({
@@ -16,6 +19,18 @@ class SubmitButton extends StatelessWidget {
   final VoidCallback? onPressed;
   @override
   Widget build(BuildContext context) {
+    Future<void> _checkOnBoardingStatus() async {
+      if (await AppPreferences.isOnboardingComplete()) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const OnBoardingScreen()),
+        );
+      }
+    }
+
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: isDark ? AppColors.secondary : AppColors.primary,
@@ -26,8 +41,10 @@ class SubmitButton extends StatelessWidget {
         elevation: 0,
       ),
       onPressed: onPressed ??
-          () {
+          () async {
             if (_formKey.currentState?.validate() ?? false) {
+              await AppPreferences.setAuthenticated(true);
+              await _checkOnBoardingStatus();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(text == "Register"

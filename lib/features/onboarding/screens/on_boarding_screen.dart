@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/core/color/colors.dart';
+import 'package:habitsync/features/main/main_screen.dart';
+import 'package:habitsync/services/app_preferences.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({super.key});
@@ -30,6 +32,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     ),
   ];
 
+  void _completeOnboarding() async {
+    await AppPreferences.setOnboardingComplete(true);
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (context) => MainScreen()));
+  }
+
   void _onNext() {
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
@@ -37,7 +45,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         curve: Curves.ease,
       );
     } else {
-      Navigator.of(context).pushReplacementNamed('/home'); // Navigate to home
+      _completeOnboarding();
     }
   }
 
@@ -51,7 +59,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   void _onSkip() {
-    Navigator.of(context).pushReplacementNamed('/home'); // Skip onboarding
+    _completeOnboarding();
   }
 
   @override
