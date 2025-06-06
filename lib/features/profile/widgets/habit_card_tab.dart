@@ -4,7 +4,9 @@ import 'package:habitsync/features/profile/widgets/habit_display_card.dart';
 
 // Habits Tab Widget (responsive)
 class HabitsTab extends StatelessWidget {
-  const HabitsTab({super.key});
+  final VoidCallback? onAddHabit;
+
+  const HabitsTab({super.key, this.onAddHabit});
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +53,7 @@ class HabitsTab extends StatelessWidget {
               ),
               // Add New Habit Card
               GestureDetector(
-                onTap: () {},
+                onTap: onAddHabit, // This will now switch the tab!
                 child: DottedBorder(
                   color: theme.dividerColor,
                   borderType: BorderType.RRect,

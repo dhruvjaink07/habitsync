@@ -4,9 +4,12 @@ import 'package:habitsync/features/profile/widgets/action_button.dart';
 import 'package:habitsync/features/profile/widgets/friends_tab.dart';
 import 'package:habitsync/features/profile/widgets/habit_card_tab.dart';
 import 'package:habitsync/features/profile/widgets/stats_card.dart';
+import 'package:habitsync/features/settings/screen/settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback? onAddHabitTap;
+
+  const ProfileScreen({super.key, this.onAddHabitTap});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +35,12 @@ class ProfileScreen extends StatelessWidget {
                     const Spacer(),
                     IconButton(
                       icon: Icon(Icons.settings, color: textColor),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SettingsScreen()));
+                      },
                     ),
                   ],
                 ),
@@ -136,11 +144,11 @@ class ProfileScreen extends StatelessWidget {
                   Tab(text: 'Achievements'),
                 ],
               ),
-              const SizedBox(
+              SizedBox(
                 height: 400, // Adjust as needed
                 child: TabBarView(
                   children: [
-                    HabitsTab(),
+                    HabitsTab(onAddHabit: onAddHabitTap), // Pass callback here
                     FriendsTab(),
                     AchievementsTab(),
                   ],

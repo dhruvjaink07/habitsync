@@ -34,8 +34,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   void _completeOnboarding() async {
     await AppPreferences.setOnboardingComplete(true);
-    Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (context) => MainScreen()));
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainScreen()));
   }
 
   void _onNext() {

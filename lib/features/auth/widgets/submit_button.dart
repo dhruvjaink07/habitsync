@@ -19,7 +19,7 @@ class SubmitButton extends StatelessWidget {
   final VoidCallback? onPressed;
   @override
   Widget build(BuildContext context) {
-    Future<void> _checkOnBoardingStatus() async {
+    Future<void> checkOnBoardingStatus() async {
       if (await AppPreferences.isOnboardingComplete()) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const MainScreen()),
@@ -44,7 +44,7 @@ class SubmitButton extends StatelessWidget {
           () async {
             if (_formKey.currentState?.validate() ?? false) {
               await AppPreferences.setAuthenticated(true);
-              await _checkOnBoardingStatus();
+              await checkOnBoardingStatus();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(text == "Register"

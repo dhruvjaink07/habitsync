@@ -15,13 +15,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _pages = <Widget>[
-    HomeScreen(),
-    AddHabitScreen(),
-    StatsScreen(),
-    ProfileScreen()
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -32,8 +25,19 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    // Pass the callback to ProfileScreen
+    final pages = [
+      HomeScreen(),
+      AddHabitScreen(),
+      StatsScreen(),
+      ProfileScreen(
+        onAddHabitTap: () => _onItemTapped(1), // 1 is the AddHabitScreen index
+      ),
+    ];
+
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: pages[_selectedIndex],
       bottomNavigationBar: AppBottomNavigationBar(
         isDark: isDark,
         selectedIndex: _selectedIndex,

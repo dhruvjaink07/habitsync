@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/core/theme/theme.dart';
-import 'package:habitsync/features/onboarding/screens/on_boarding_screen.dart';
 import 'package:habitsync/features/onboarding/screens/splash_screen.dart';
 
 void main() {
