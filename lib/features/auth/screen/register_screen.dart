@@ -1,26 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/core/utils/constants.dart';
+import 'package:habitsync/features/auth/controller/auth_controller.dart';
 import 'package:habitsync/features/auth/screen/login_screen.dart';
 import 'package:habitsync/features/auth/widgets/button_divider.dart';
 import 'package:habitsync/features/auth/widgets/google_sign_in_button.dart';
 import 'package:habitsync/features/auth/widgets/submit_button.dart';
 import 'package:habitsync/features/auth/widgets/secure_text_fields.dart';
+import 'package:habitsync/features/main/main_screen.dart';
+import 'package:habitsync/features/onboarding/screens/on_boarding_screen.dart';
+import 'package:habitsync/services/app_preferences.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  void handleRegister() {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (_passwordController.text == _confirmPasswordController.text) {
+        ref.read(authControllerProvider.notifier).register(
+            _usernameController.text.trim(),
+            _emailController.text.trim(),
+            _passwordController.text.trim());
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -37,6 +54,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    ref.listen(authControllerProvider, (prev, next) async {
+      if (next is AsyncLoading) {
+        EasyLoading.show(status: 'Creating account...');
+      } else {
+        EasyLoading.dismiss();
+      }
+
+      if (next is AsyncData && next.value != null) {
+        await AppPreferences.setAuthenticated(true);
+
+        final hasSeenOnboarding = await AppPreferences.isOnboardingComplete();
+        final route =
+            hasSeenOnboarding ? const MainScreen() : const OnBoardingScreen();
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => route),
+          (route) => false,
+        );
+      } else if (next is AsyncError) {
+        EasyLoading.showError(next.error.toString());
+      }
+    });
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -168,8 +208,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                   ),
                   const SizedBox(height: 15),
+                  // Register Button
                   SubmitButton(
-                      isDark: isDark, text: "Register", formKey: _formKey),
+                    isDark: isDark,
+                    text: "Register",
+                    onPressed: handleRegister,
+                  ),
                   const SizedBox(height: 18),
                   ButtonDivider(isDark: isDark),
                   const SizedBox(height: 18),

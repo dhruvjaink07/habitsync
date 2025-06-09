@@ -11,12 +11,12 @@ class ProfileSection extends StatelessWidget {
         CircleAvatar(
           radius: 36,
           backgroundColor: Colors.grey[300],
-          child: Icon(Icons.person, size: 40, color: Colors.white),
+          child: const Icon(Icons.person, size: 40, color: Colors.white),
         ),
         const SizedBox(width: 16),
-        Column(
+        const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text(
               'John Doe',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),

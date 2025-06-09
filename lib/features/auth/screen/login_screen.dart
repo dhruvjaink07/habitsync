@@ -1,24 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/core/utils/constants.dart';
+import 'package:habitsync/features/auth/controller/auth_controller.dart';
 import 'package:habitsync/features/auth/screen/register_screen.dart';
 import 'package:habitsync/features/auth/widgets/button_divider.dart';
 import 'package:habitsync/features/auth/widgets/google_sign_in_button.dart';
 import 'package:habitsync/features/auth/widgets/secure_text_fields.dart';
 import 'package:habitsync/features/auth/widgets/submit_button.dart';
+import 'package:habitsync/features/onboarding/screens/on_boarding_screen.dart';
+import 'package:habitsync/features/main/main_screen.dart';
+import 'package:habitsync/services/app_preferences.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  void handleLogin() {
+    if (_formKey.currentState?.validate() ?? false) {
+      ref.read(authControllerProvider.notifier).login(
+            _emailController.text.trim(),
+            _passwordController.text,
+          );
+    }
+  }
 
   @override
   void dispose() {
@@ -31,6 +45,36 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    ref.listen(authControllerProvider, (prev, next) async {
+      if (next is AsyncLoading) {
+        EasyLoading.show(status: 'Logging in...');
+      } else {
+        EasyLoading.dismiss();
+      }
+
+      if (next is AsyncData && next.value != null) {
+        // if (next is AsyncData) {
+        await AppPreferences.setAuthenticated(true);
+
+        final hasSeenOnboarding = await AppPreferences.isOnboardingComplete();
+        final route =
+            hasSeenOnboarding ? const MainScreen() : const OnBoardingScreen();
+
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => route),
+          (route) => false,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Login successful")),
+        );
+      } else if (next is AsyncError) {
+        EasyLoading.showError("Login failed: ${next.error}");
+      }
+    });
 
     return Scaffold(
       body: Container(
@@ -49,8 +93,8 @@ class _LoginScreenState extends State<LoginScreen> {
               autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // Avatar
                   Container(
                     height: 70,
                     width: 70,
@@ -84,8 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                      letterSpacing: 0.5,
+                      color: isDark ? Colors.white : AppColors.headingLight,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -93,11 +136,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     "Sign in to continue",
                     style: TextStyle(
                       fontSize: 16,
-                      color: isDark ? Colors.white70 : Colors.black54,
+                      color: isDark ? Colors.white70 : AppColors.subtextLight,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 22),
+
+                  // Email
                   SecureFields(
                     controller: _emailController,
                     isDark: isDark,
@@ -114,6 +159,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   const SizedBox(height: 14),
+
+                  // Password
                   SecureFields(
                     controller: _passwordController,
                     isDark: isDark,
@@ -131,22 +178,33 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   const SizedBox(height: 6),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
                         onPressed: () {},
-                        style: TextButton.styleFrom(
-                          foregroundColor:
-                              isDark ? AppColors.secondary : AppColors.primary,
+                        child: Text(
+                          "Forgot Password?",
+                          style: TextStyle(
+                            color: isDark
+                                ? AppColors.secondary
+                                : AppColors.primary.withOpacity(0.85),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        child: const Text("Forgot Password?"),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 20),
+
+                  // Login Button
                   SubmitButton(
-                      isDark: isDark, text: "Login", formKey: _formKey),
+                    isDark: isDark,
+                    text: "Login",
+                    onPressed: handleLogin,
+                  ),
+
                   const SizedBox(height: 18),
                   ButtonDivider(isDark: isDark),
                   const SizedBox(height: 18),
@@ -154,16 +212,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 12),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return const RegisterScreen();
-                      }));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const RegisterScreen(),
+                        ),
+                      );
                     },
                     child: Text(
                       "Don't have an account? Register",
                       style: TextStyle(
                         fontSize: 16,
-                        color: isDark ? AppColors.secondary : AppColors.primary,
+                        color: isDark
+                            ? AppColors.secondary
+                            : AppColors.primary.withOpacity(0.85),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

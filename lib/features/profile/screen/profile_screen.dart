@@ -5,11 +5,34 @@ import 'package:habitsync/features/profile/widgets/friends_tab.dart';
 import 'package:habitsync/features/profile/widgets/habit_card_tab.dart';
 import 'package:habitsync/features/profile/widgets/stats_card.dart';
 import 'package:habitsync/features/settings/screen/settings_screen.dart';
+import 'package:habitsync/services/profile_cache_service.dart';
+import 'package:habitsync/features/auth/domain/user_model.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final VoidCallback? onAddHabitTap;
 
   const ProfileScreen({super.key, this.onAddHabitTap});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = await ProfileCacheService.getCachedUserProfile();
+    print('Fetched user: ${user?.username}');
+    setState(() {
+      _user = user;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +62,7 @@ class ProfileScreen extends StatelessWidget {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SettingsScreen()));
+                                builder: (context) => const SettingsScreen()));
                       },
                     ),
                   ],
@@ -148,9 +171,10 @@ class ProfileScreen extends StatelessWidget {
                 height: 400, // Adjust as needed
                 child: TabBarView(
                   children: [
-                    HabitsTab(onAddHabit: onAddHabitTap), // Pass callback here
-                    FriendsTab(),
-                    AchievementsTab(),
+                    HabitsTab(
+                        onAddHabit: widget.onAddHabitTap), // Pass callback here
+                    const FriendsTab(),
+                    const AchievementsTab(),
                   ],
                 ),
               ),

@@ -38,6 +38,10 @@ dependencies:
   dotted_border: ^2.1.0
   shared_preferences: ^2.5.3
   confetti: ^0.8.0
+  dio: ^5.8.0+1
+  riverpod: ^2.6.1
+  flutter_riverpod: ^2.6.1
+  flutter_easyloading: ^3.0.5
 
 dev_dependencies:
   flutter_test:

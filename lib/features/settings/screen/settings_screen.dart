@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/core/color/colors.dart';
+import 'package:habitsync/features/auth/controller/auth_controller.dart';
+import 'package:habitsync/features/onboarding/screens/splash_screen.dart';
 import 'package:habitsync/features/settings/widgets/delete_section.dart';
 import 'package:habitsync/features/settings/widgets/profile_section.dart';
 import 'package:habitsync/features/settings/widgets/setting_list_tile.dart';
 import 'package:habitsync/features/settings/widgets/switch_section.dart';
 
 // --- Main Settings Screen ---
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool habitReminders = true;
   bool friendActivity = false;
 
@@ -144,8 +147,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () {
-                // Add logout logic
+              onPressed: () async {
+                await ref.read(authControllerProvider.notifier).logout();
+                if (mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => SplashScreen()),
+                      (route) => false);
+                }
               },
             ),
           ),
