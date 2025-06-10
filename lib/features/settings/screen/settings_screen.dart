@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/features/auth/controller/auth_controller.dart';
+import 'package:habitsync/features/auth/domain/user_model.dart';
 import 'package:habitsync/features/onboarding/screens/splash_screen.dart';
+import 'package:habitsync/features/profile/controller/profile_controller.dart';
 import 'package:habitsync/features/settings/widgets/delete_section.dart';
 import 'package:habitsync/features/settings/widgets/profile_section.dart';
 import 'package:habitsync/features/settings/widgets/setting_list_tile.dart';
 import 'package:habitsync/features/settings/widgets/switch_section.dart';
+import 'package:habitsync/services/profile_cache_service.dart';
 
 // --- Main Settings Screen ---
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -19,9 +22,26 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool habitReminders = true;
   bool friendActivity = false;
+  User? _user;
+  Future<void> _loadProfile() async {
+    final User? user = await ProfileCacheService.getCachedUserProfile();
+    setState(() {
+      _user = user;
+    });
+  }
+
+  Future<void> _deleteAccount() async {
+    ref.read(profileControllerProvider.notifier).deleteProfile();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Account deleted.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
 
   Future<void> _confirmDeleteAccount(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text(
@@ -37,23 +57,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              _deleteAccount();
+              Navigator.of(context).pop(true);
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const SplashScreen()),
+                (route) => false,
+              );
+            },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
           ),
         ],
       ),
     );
-    if (confirmed == true) {
-      // TODO: Add your delete account logic here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account deleted.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      // Optionally navigate away or log out
-    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
   }
 
   @override
@@ -72,7 +95,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         children: [
-          const ProfileSection(),
+          ProfileSection(
+              url: _user?.avatar ?? 'https://i.pravatar.cc/150?img=3',
+              name: _user?.name ?? 'John Doe',
+              email: _user?.email ?? 'john@doe.com'),
           const SizedBox(height: 32),
           SettingsSwitchTile(
             icon: Icons.notifications,

@@ -1,13 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/core/color/colors.dart';
+import 'package:habitsync/core/color/strings.dart';
 import 'package:habitsync/data/dummy_task_data.dart';
-import 'package:habitsync/features/home/widgets/appBar.dart';
+import 'package:habitsync/features/auth/domain/user_model.dart';
+import 'package:habitsync/features/home/widgets/app_bar.dart';
 import 'package:habitsync/features/home/widgets/streak_indicator.dart';
 import 'package:habitsync/features/home/widgets/tab_indicator.dart';
 import 'package:habitsync/features/home/widgets/task_card.dart';
+import 'package:habitsync/services/profile_cache_service.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  final VoidCallback? onProfileTap;
+  const HomeScreen({super.key, this.onProfileTap});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  User? _user;
+
+  Future<void> _loadProfile() async {
+    final user = await ProfileCacheService.getCachedUserProfile();
+    setState(() {
+      _user = user;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +50,12 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const HS_AppBar(),
+        title: HS_AppBar(
+          url: _user?.avatar ?? 'https://i.pravatar.cc/150?img=3',
+          username: _user?.name ?? AppStrings.username,
+          greet: AppStrings.greet,
+          onProfileTap: widget.onProfileTap,
+        ),
         centerTitle: true,
       ),
       body: DefaultTabController(

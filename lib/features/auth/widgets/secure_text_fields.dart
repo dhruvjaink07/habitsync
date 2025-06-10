@@ -8,11 +8,13 @@ class SecureFields extends StatelessWidget {
       required this.hintText,
       required this.icon,
       required this.validator,
-      this.isPassword = false});
+      this.isPassword = false,
+      this.keyboardType = TextInputType.text});
 
   final bool isDark;
   final String hintText;
   final bool isPassword;
+  final TextInputType? keyboardType;
   final IconData icon;
   final String? Function(String?)? validator;
   final TextEditingController? controller;
@@ -22,6 +24,7 @@ class SecureFields extends StatelessWidget {
     return TextFormField(
       controller: controller,
       validator: validator,
+      keyboardType: keyboardType ?? TextInputType.text,
       obscureText: isPassword,
       obscuringCharacter: "*",
       decoration: InputDecoration(

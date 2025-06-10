@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habitsync/features/auth/controller/auth_controller.dart';
+import 'package:habitsync/features/profile/controller/profile_controller.dart';
 import 'package:habitsync/features/profile/widgets/achievements_tab.dart';
 import 'package:habitsync/features/profile/widgets/action_button.dart';
 import 'package:habitsync/features/profile/widgets/friends_tab.dart';
@@ -7,31 +10,114 @@ import 'package:habitsync/features/profile/widgets/stats_card.dart';
 import 'package:habitsync/features/settings/screen/settings_screen.dart';
 import 'package:habitsync/services/profile_cache_service.dart';
 import 'package:habitsync/features/auth/domain/user_model.dart';
+import 'package:habitsync/services/image_service.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   final VoidCallback? onAddHabitTap;
 
   const ProfileScreen({super.key, this.onAddHabitTap});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   User? _user;
 
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    Future.microtask(() => _refreshProfile());
+  }
+
+  Future<void> _refreshProfile() async {
+    ref.read(authControllerProvider.notifier).refreshProfile().then((_) {
+      _loadProfile();
+    });
   }
 
   Future<void> _loadProfile() async {
     final user = await ProfileCacheService.getCachedUserProfile();
-    print('Fetched user: ${user?.username}');
     setState(() {
       _user = user;
     });
+  }
+
+  Future<void> _imagePicker() async {
+    if (_user == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Change Profile Picture',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Camera'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _handleImagePickAndUpdate(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _handleImagePickAndUpdate(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleImagePickAndUpdate(ImageSource source) async {
+    final imageService = ImageService();
+    final imageUrl = await imageService.pickAndUploadImage(source);
+    print('Image URL: $imageUrl');
+    if (imageUrl != null && _user != null) {
+      final updatedUser = _user!.copyWith(avatar: imageUrl);
+      print('Updating user with: ${updatedUser.toJson()}');
+      try {
+        await ref
+            .read(profileControllerProvider.notifier)
+            .updateProfile(updatedUser);
+        print('Profile update successful');
+        await ProfileCacheService.cacheUserProfile(updatedUser);
+        setState(() {
+          _user = updatedUser;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile picture updated!')),
+        );
+      } catch (e, st) {
+        print('Error updating profile: $e\n$st');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile update failed!')),
+        );
+      }
+    } else {
+      print('Image upload failed or user is null');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Image upload failed')),
+      );
+    }
   }
 
   @override
@@ -69,16 +155,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               // Avatar
-              CircleAvatar(
-                radius: 48,
-                backgroundImage:
-                    const NetworkImage('https://i.pravatar.cc/150?img=3'),
-                backgroundColor: cardColor,
+              InkWell(
+                onTap: () => _imagePicker(),
+                onLongPress: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => Dialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50)),
+                      backgroundColor: Colors.transparent,
+                      child: CircleAvatar(
+                        radius: 150,
+                        backgroundImage: CachedNetworkImageProvider(
+                          _user?.avatar?.isNotEmpty == true
+                              ? _user!.avatar
+                              : 'https://i.pravatar.cc/150?img=3',
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 48,
+                  backgroundImage: CachedNetworkImageProvider(
+                    _user?.avatar?.isNotEmpty == true
+                        ? _user!.avatar
+                        : 'https://i.pravatar.cc/150?img=3',
+                  ),
+                  backgroundColor: cardColor,
+                ),
               ),
               const SizedBox(height: 12),
               // Name
               Text(
-                'Sarah Anderson',
+                _user?.name ?? 'Habit Sync User',
                 style: theme.textTheme.titleLarge?.copyWith(
                   color: textColor,
                   fontWeight: FontWeight.bold,
@@ -87,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               // Username
               Text(
-                '@sarahloves2grow',
+                '@${_user?.username ?? 'habit_sync_user'}',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: subTextColor,
                   fontSize: 16,
@@ -112,18 +222,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 20),
               // Streak & Check-ins
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   StatCard(
                     icon: Icons.local_fire_department,
                     label: 'Current Streak',
-                    value: '12',
+                    value: _user?.streak.toString() ?? '0',
                     color1: Colors.blueAccent,
                     color2: Colors.purpleAccent,
                   ),
-                  SizedBox(width: 16),
-                  StatCard(
+                  const SizedBox(width: 16),
+                  const StatCard(
                     icon: Icons.check_circle,
                     label: 'Weekly Check-ins',
                     value: '85%',

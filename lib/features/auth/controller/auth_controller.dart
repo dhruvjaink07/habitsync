@@ -26,10 +26,11 @@ class AuthController extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
-  Future<void> register(String username, String email, String password) async {
+  Future<void> register(
+      String username, String name, String email, String password) async {
     state = const AsyncValue.loading();
     try {
-      await _authRepository.register(username, email, password);
+      await _authRepository.register(username, name, email, password);
       final user = await _authRepository.getProfile();
       await ProfileCacheService.cacheUserProfile(user);
       state = AsyncValue.data(user);
@@ -43,6 +44,17 @@ class AuthController extends StateNotifier<AsyncValue<User?>> {
     try {
       await _authRepository.logout();
       state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> refreshProfile() async {
+    state = const AsyncValue.loading();
+    try {
+      final user = await _authRepository.getProfile();
+      await ProfileCacheService.cacheUserProfile(user);
+      state = AsyncValue.data(user);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

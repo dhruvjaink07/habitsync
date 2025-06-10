@@ -28,7 +28,9 @@ class _MainScreenState extends State<MainScreen> {
 
     // Pass the callback to ProfileScreen
     final pages = [
-      const HomeScreen(),
+      HomeScreen(
+        onProfileTap: () => _onItemTapped(3),
+      ),
       const AddHabitScreen(),
       const StatsScreen(),
       ProfileScreen(

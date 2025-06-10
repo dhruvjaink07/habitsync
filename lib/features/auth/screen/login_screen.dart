@@ -69,7 +69,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Login successful")),
+          const SnackBar(content: Text("User authencated successfully")),
         );
       } else if (next is AsyncError) {
         EasyLoading.showError("Login failed: ${next.error}");

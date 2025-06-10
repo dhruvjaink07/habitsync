@@ -26,6 +26,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   void handleRegister() {
@@ -33,6 +34,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (_passwordController.text == _confirmPasswordController.text) {
         ref.read(authControllerProvider.notifier).register(
             _usernameController.text.trim(),
+            _nameController.text.trim(),
             _emailController.text.trim(),
             _passwordController.text.trim());
       }
@@ -46,6 +48,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _usernameController.dispose();
+    _nameController.dispose();
     _formKey.currentState?.dispose();
   }
 
@@ -147,13 +150,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     controller: _usernameController,
                     isDark: isDark,
                     hintText: "Enter username",
-                    icon: Icons.person_outline,
+                    icon: Icons.alternate_email,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return "Username cannot be empty";
                       }
+                      if (value.contains(' ')) {
+                        return "Username cannot contain spaces";
+                      }
                       if (value.trim().length < 3) {
                         return "Username must be at least 3 characters";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 18),
+                  SecureFields(
+                    controller: _nameController,
+                    isDark: isDark,
+                    hintText: "Enter name",
+                    icon: Icons.person_outline,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Name cannot be empty";
+                      }
+                      if (value.trim().length < 3) {
+                        return "Name must be at least 3 characters";
                       }
                       return null;
                     },
@@ -173,6 +195,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 18),
                   SecureFields(

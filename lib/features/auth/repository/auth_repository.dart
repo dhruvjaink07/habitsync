@@ -12,9 +12,10 @@ class AuthRepository {
     }
   }
 
-  Future<void> register(String username, String email, String password) async {
+  Future<void> register(
+      String username, String name, String email, String password) async {
     try {
-      await _authService.register(username, email, password);
+      await _authService.register(username, name, email, password);
     } catch (e) {
       rethrow; // Propagate the error to the caller
     }

@@ -19,9 +19,11 @@ class AuthService {
     // No need to parse user here
   }
 
-  Future<void> register(String username, String email, String password) async {
+  Future<void> register(
+      String username, String name, String email, String password) async {
     final res = await _dio.post('/auth/register', data: {
       'username': username,
+      'name': name,
       'email': email,
       'password': password,
     });
