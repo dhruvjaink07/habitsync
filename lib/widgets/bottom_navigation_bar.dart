@@ -25,6 +25,7 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
       Icons.home_outlined,
       Icons.add,
       Icons.bar_chart_outlined,
+      Icons.group_outlined,
       Icons.person_outline,
     ];
 

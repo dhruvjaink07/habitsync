@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitsync/features/friends/screen/friend_screen.dart';
 import 'package:habitsync/features/habits/screens/add_habit_screen.dart';
 import 'package:habitsync/features/home/screen/home_screen.dart';
 import 'package:habitsync/features/profile/screen/profile_screen.dart';
@@ -29,10 +30,11 @@ class _MainScreenState extends State<MainScreen> {
     // Pass the callback to ProfileScreen
     final pages = [
       HomeScreen(
-        onProfileTap: () => _onItemTapped(3),
+        onProfileTap: () => _onItemTapped(4),
       ),
       const AddHabitScreen(),
       const StatsScreen(),
+      const FriendsScreen(),
       ProfileScreen(
         onAddHabitTap: () => _onItemTapped(1), // 1 is the AddHabitScreen index
       ),
