@@ -32,7 +32,7 @@ class ProfileService {
       }
     } catch (e) {
       print('Error updating profile: $e');
-      throw e; // Re-throw the error for further handling if needed
+      rethrow; // Re-throw the error for further handling if needed
     }
   }
 
@@ -41,7 +41,7 @@ class ProfileService {
       await dio.delete('/user/delete');
     } catch (e) {
       print('Error deleting profile: $e');
-      throw e;
+      rethrow;
     }
   }
 }

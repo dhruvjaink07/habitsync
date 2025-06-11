@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/core/color/strings.dart';
-import 'package:habitsync/data/dummy_task_data.dart';
 import 'package:habitsync/features/auth/domain/user_model.dart';
+import 'package:habitsync/features/habits/controller/habit_controller.dart';
+import 'package:habitsync/features/habits/domain/habit_model.dart';
 import 'package:habitsync/features/home/widgets/app_bar.dart';
+import 'package:habitsync/features/home/widgets/habit_detail_dialog.dart';
 import 'package:habitsync/features/home/widgets/streak_indicator.dart';
 import 'package:habitsync/features/home/widgets/tab_indicator.dart';
-import 'package:habitsync/features/home/widgets/task_card.dart';
+import 'package:habitsync/features/home/widgets/habit_card.dart';
 import 'package:habitsync/services/profile_cache_service.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   final VoidCallback? onProfileTap;
-  const HomeScreen({super.key, this.onProfileTap});
+  final VoidCallback? onAddHabitTap;
+  const HomeScreen({super.key, this.onProfileTap, this.onAddHabitTap});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   User? _user;
 
   Future<void> _loadProfile() async {
@@ -25,12 +29,54 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _user = user;
     });
+    if (user != null) {
+      // Fetch habits for this user
+      await ref
+          .read(habitControllerProvider.notifier)
+          .getHabitsByOwner(user.id);
+    }
   }
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
+  }
+
+  void _navigateToAddHabit(BuildContext context) async {
+    widget.onAddHabitTap!();
+    if (_user != null) {
+      await ref
+          .read(habitControllerProvider.notifier)
+          .getHabitsByOwner(_user!.id);
+    }
+  }
+
+  void _showHabitDialog(BuildContext context, Habit habit) {
+    showDialog(
+      context: context,
+      builder: (context) => HabitDetailDialog(
+        habit: habit,
+        onUpdate: (updatedHabit) async {
+          await ref
+              .read(habitControllerProvider.notifier)
+              .updateHabit(updatedHabit);
+          // Optionally show a snackbar
+          if (_user != null) {
+            await ref
+                .read(habitControllerProvider.notifier)
+                .getHabitsByOwner(_user!.id);
+          }
+        },
+        onDelete: () async {
+          Navigator.of(context).pop();
+          await ref
+              .read(habitControllerProvider.notifier)
+              .deleteHabit(habit.id, habit.owner);
+          // Optionally show a snackbar
+        },
+      ),
+    );
   }
 
   @override
@@ -43,6 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final Gradient backgroundGradient = isDark
         ? AppColors.darkBackgroundGradient
         : AppColors.lightBackgroundGradient;
+
+    final habitsAsync = ref.watch(habitControllerProvider);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -58,74 +106,125 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         centerTitle: true,
       ),
-      body: DefaultTabController(
-        length: 3,
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(gradient: backgroundGradient),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(height: screenHeight * 0.1),
-                StreakIndicator(
-                  screenHeigt: screenHeight,
-                  isDark: isDark,
-                  screenWidth: screenWidth,
+      body: habitsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => Center(child: Text('Error: $e')),
+        data: (habits) {
+          if (habits.isEmpty) {
+            return Container(
+              width: double.infinity,
+              decoration: BoxDecoration(gradient: backgroundGradient),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.sentiment_dissatisfied,
+                        size: 64, color: theme.colorScheme.primary),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "No habits yet!",
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Start building your habits now.",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => _navigateToAddHabit(context),
+                      icon: const Icon(Icons.arrow_forward),
+                      label: const Text("Create Habit"),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                TabIndicator(isDark: isDark),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      // All
-                      ListView.builder(
-                        itemCount: DummyTaskData()
-                            .dummyTasks
-                            .length, // Example item count
-                        itemBuilder: (context, index) {
-                          final task = DummyTaskData().dummyTasks[index];
-                          return TaskCard(task: task, heigth: screenHeight);
-                        },
+              ),
+            );
+          }
+          return DefaultTabController(
+            length: 3,
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(gradient: backgroundGradient),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(height: screenHeight * 0.1),
+                    StreakIndicator(
+                      screenHeigt: screenHeight,
+                      isDark: isDark,
+                      screenWidth: screenWidth,
+                    ),
+                    const SizedBox(height: 24),
+                    TabIndicator(isDark: isDark),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          // All
+                          ListView.builder(
+                            itemCount: habits.length,
+                            itemBuilder: (context, index) {
+                              final habit = habits[index];
+                              return HabitCard(
+                                habit: habit,
+                                height: screenHeight,
+                                onTap: () => _showHabitDialog(context, habit),
+                              );
+                            },
+                          ),
+                          // Personal
+                          ListView.builder(
+                            itemCount: habits
+                                .where((h) => !h.sharedWith.contains(_user?.id))
+                                .length,
+                            itemBuilder: (context, index) {
+                              final habit = habits
+                                  .where(
+                                      (h) => !h.sharedWith.contains(_user?.id))
+                                  .toList()[index];
+                              return HabitCard(
+                                habit: habit,
+                                height: screenHeight,
+                                onTap: () => _showHabitDialog(context, habit),
+                              );
+                            },
+                          ),
+                          // Shared
+                          ListView.builder(
+                            itemCount: habits
+                                .where((h) => h.sharedWith.contains(_user?.id))
+                                .length,
+                            itemBuilder: (context, index) {
+                              final habit = habits
+                                  .where(
+                                      (h) => h.sharedWith.contains(_user?.id))
+                                  .toList()[index];
+                              return HabitCard(
+                                habit: habit,
+                                height: screenHeight,
+                                onTap: () => _showHabitDialog(context, habit),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-
-                      // Personal
-                      ListView.builder(
-                        itemCount: DummyTaskData()
-                            .dummyTasks
-                            .length, // Example item count
-                        itemBuilder: (context, index) {
-                          final task = DummyTaskData().dummyTasks[index];
-                          if (!task.isShared) {
-                            return TaskCard(task: task, heigth: screenHeight);
-                          } else {
-                            return const SizedBox.shrink();
-                          }
-                        },
-                      ),
-
-                      // Shared
-                      ListView.builder(
-                        itemCount: DummyTaskData()
-                            .dummyTasks
-                            .length, // Example item count
-                        itemBuilder: (context, index) {
-                          final task = DummyTaskData().dummyTasks[index];
-                          if (task.isShared) {
-                            return TaskCard(task: task, heigth: screenHeight);
-                          } else {
-                            return const SizedBox.shrink();
-                          }
-                        },
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

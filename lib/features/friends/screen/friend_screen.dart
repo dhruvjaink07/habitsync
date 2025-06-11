@@ -6,7 +6,7 @@ import 'package:habitsync/features/friends/widgets/friend_request_section.dart';
 import 'package:habitsync/features/friends/widgets/search_friend_section.dart';
 
 class FriendsScreen extends StatefulWidget {
-  const FriendsScreen({Key? key}) : super(key: key);
+  const FriendsScreen({super.key});
 
   @override
   State<FriendsScreen> createState() => _FriendsScreenState();

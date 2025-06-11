@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/features/habits/widgets/color_dot.dart';
-import 'package:habitsync/features/habits/widgets/emoji_dot.dart';
 
 class ColorEmojiNotesSection extends StatelessWidget {
   final ThemeData theme;
@@ -10,9 +9,6 @@ class ColorEmojiNotesSection extends StatelessWidget {
   final List<Color> colorOptions;
   final Color selectedColor;
   final ValueChanged<Color> onColorSelected;
-  final List<String> emojiOptions;
-  final String selectedEmoji;
-  final ValueChanged<String> onEmojiSelected;
   final TextEditingController notesController;
 
   const ColorEmojiNotesSection({
@@ -24,9 +20,6 @@ class ColorEmojiNotesSection extends StatelessWidget {
     required this.colorOptions,
     required this.selectedColor,
     required this.onColorSelected,
-    required this.emojiOptions,
-    required this.selectedEmoji,
-    required this.onEmojiSelected,
     required this.notesController,
   });
 
@@ -55,26 +48,6 @@ class ColorEmojiNotesSection extends StatelessWidget {
                   child: ColorDot(
                     color: colorOptions[i],
                     selected: selectedColor == colorOptions[i],
-                  ),
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 18),
-          Text('Emoji',
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: subTextColor, fontSize: 15)),
-          const SizedBox(height: 10),
-          Row(
-            children: List.generate(emojiOptions.length, (i) {
-              return Padding(
-                padding: EdgeInsets.only(
-                    right: i < emojiOptions.length - 1 ? 12 : 0),
-                child: GestureDetector(
-                  onTap: () => onEmojiSelected(emojiOptions[i]),
-                  child: EmojiDot(
-                    emojiOptions[i],
-                    selected: selectedEmoji == emojiOptions[i],
                   ),
                 ),
               );

@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:habitsync/core/color/colors.dart';
-import 'package:habitsync/features/home/widgets/overlapping_avatars.dart';
-import 'package:habitsync/models/task_model.dart';
+import 'package:habitsync/features/habits/domain/habit_model.dart';
 import 'package:habitsync/widgets/glass/glass_morphism.dart';
 
-class TaskCard extends StatefulWidget {
-  final TaskModel task;
-  double heigth;
+class HabitCard extends StatefulWidget {
+  final Habit habit;
+  final double height;
+  final VoidCallback? onTap; // Add this
 
-  TaskCard({super.key, required this.task, required this.heigth});
+  const HabitCard({
+    super.key,
+    required this.habit,
+    required this.height,
+    this.onTap,
+  });
 
   @override
-  State<TaskCard> createState() => _TaskCardState();
+  State<HabitCard> createState() => _HabitCardState();
 }
 
-class _TaskCardState extends State<TaskCard>
+class _HabitCardState extends State<HabitCard>
     with SingleTickerProviderStateMixin {
   bool isCompleted = false;
   late AnimationController _controller;
@@ -46,16 +51,19 @@ class _TaskCardState extends State<TaskCard>
       });
       _controller.forward(from: 0.0);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${widget.task.title} marked as completed!')),
+        SnackBar(content: Text('${widget.habit.title} marked as completed!')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final color =
+        Color(int.parse(widget.habit.color.replaceFirst('#', '0xff')));
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
+        onTap: widget.onTap, // Add this
         onHorizontalDragEnd: (details) {
           if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
             markCompleted();
@@ -69,9 +77,9 @@ class _TaskCardState extends State<TaskCard>
               end: 0.2,
               child: Container(
                 padding: const EdgeInsets.all(10),
-                height: widget.task.isShared
-                    ? widget.heigth * 0.18
-                    : widget.heigth * 0.16,
+                height: widget.habit.sharedWith.isNotEmpty
+                    ? widget.height * 0.18
+                    : widget.height * 0.16,
                 width: double.infinity,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -83,17 +91,23 @@ class _TaskCardState extends State<TaskCard>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(widget.task.title ?? ''),
-                            Text(widget.task.description ?? ''),
+                            Text(widget.habit.title,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: color)),
+                            if (widget.habit.notes.isNotEmpty)
+                              Text(widget.habit.notes,
+                                  style: const TextStyle(fontSize: 14)),
                           ],
                         ),
                         Row(
                           children: [
                             const Icon(
-                              Icons.local_fire_department,
-                              color: AppColors.workoutColor,
+                              Icons.repeat,
+                              color: AppColors.readingColor,
                             ),
-                            Text((widget.task.streakCount ?? '').toString())
+                            Text(widget.habit.repeatPattern),
                           ],
                         )
                       ],
@@ -102,17 +116,22 @@ class _TaskCardState extends State<TaskCard>
                     LinearProgressIndicator(
                       minHeight: 8,
                       borderRadius: BorderRadius.circular(24),
-                      value: (widget.task.streakCount ?? 0) * 0.10,
+                      value: isCompleted ? 1.0 : 0.0,
                       backgroundColor: AppColors.progressBackground,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppColors.readingColor),
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
                     ),
                     const SizedBox(height: 12),
                     Visibility(
-                      visible: widget.task.isShared,
+                      visible: widget.habit.sharedWith.isNotEmpty,
                       child: const Align(
-                          alignment: Alignment.centerRight,
-                          child: OverlappingAvatars()),
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          "Shared",
+                          style: TextStyle(
+                              color: AppColors.readingColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ),
                   ],
                 ),

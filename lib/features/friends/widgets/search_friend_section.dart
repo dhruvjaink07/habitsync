@@ -12,7 +12,7 @@ class SearchFriendsSection extends StatefulWidget {
 
 class _SearchFriendsSectionState extends State<SearchFriendsSection> {
   final TextEditingController _controller = TextEditingController();
-  List<Map<String, String>> _results = [
+  final List<Map<String, String>> _results = [
     {
       'name': 'David Kim',
       'avatar': 'https://randomuser.me/api/portraits/men/4.jpg',

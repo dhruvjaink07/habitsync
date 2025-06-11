@@ -31,8 +31,11 @@ class _MainScreenState extends State<MainScreen> {
     final pages = [
       HomeScreen(
         onProfileTap: () => _onItemTapped(4),
+        onAddHabitTap: () => _onItemTapped(1),
       ),
-      const AddHabitScreen(),
+      AddHabitScreen(
+        onHabitAdded: () => _onItemTapped(0),
+      ),
       const StatsScreen(),
       const FriendsScreen(),
       ProfileScreen(

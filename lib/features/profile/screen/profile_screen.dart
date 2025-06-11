@@ -167,7 +167,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: CircleAvatar(
                         radius: 150,
                         backgroundImage: CachedNetworkImageProvider(
-                          _user?.avatar?.isNotEmpty == true
+                          _user?.avatar.isNotEmpty == true
                               ? _user!.avatar
                               : 'https://i.pravatar.cc/150?img=3',
                         ),
@@ -178,7 +178,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: CircleAvatar(
                   radius: 48,
                   backgroundImage: CachedNetworkImageProvider(
-                    _user?.avatar?.isNotEmpty == true
+                    _user?.avatar.isNotEmpty == true
                         ? _user!.avatar
                         : 'https://i.pravatar.cc/150?img=3',
                   ),

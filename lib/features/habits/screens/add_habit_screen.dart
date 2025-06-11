@@ -1,38 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/core/color/colors.dart';
+import 'package:habitsync/features/auth/domain/user_model.dart';
+import 'package:habitsync/features/habits/controller/habit_controller.dart';
+import 'package:habitsync/features/habits/domain/habit_model.dart';
 import 'package:habitsync/features/habits/widgets/category_button.dart';
 import 'package:habitsync/features/habits/widgets/color_emoji_section.dart';
 import 'package:habitsync/features/habits/widgets/date_time_repeat_section.dart';
 import 'package:habitsync/features/habits/widgets/reminder_collaborator_section.dart';
+import 'package:habitsync/services/profile_cache_service.dart';
 
-class AddHabitScreen extends StatefulWidget {
-  const AddHabitScreen({super.key});
+class AddHabitScreen extends ConsumerStatefulWidget {
+  final VoidCallback? onHabitAdded;
+  const AddHabitScreen({super.key, this.onHabitAdded});
 
   @override
-  State<AddHabitScreen> createState() => _AddHabitScreenState();
+  ConsumerState<AddHabitScreen> createState() => _AddHabitScreenState();
 }
 
-class _AddHabitScreenState extends State<AddHabitScreen> {
+class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
 
-  String _selectedCategory = 'Meditation';
   String _selectedRepeat = 'Daily';
   String _selectedPermission = 'Edit';
   bool _reminder = true;
   Color _selectedColor = AppColors.primary;
-  String _selectedEmoji = '😊';
-
-  // For demonstration, you can expand this list
-  final List<String> _categories = ['Meditation', 'Reading', 'Workout'];
-  final List<Map<String, dynamic>> _categoryIcons = [
-    {'icon': Icons.grid_view_rounded, 'color': AppColors.meditationColor},
-    {'icon': Icons.menu_book_rounded, 'color': AppColors.readingColor},
-    {'icon': Icons.graphic_eq_rounded, 'color': AppColors.workoutColor},
-  ];
   final List<String> _repeatOptions = ['Daily', 'Weekly', 'Custom'];
   final List<String> _permissionOptions = ['Edit', 'View', 'Updates'];
   final List<Color> _colorOptions = [
@@ -42,7 +38,21 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Colors.pinkAccent,
     Colors.yellow,
   ];
-  final List<String> _emojiOptions = ['😊', '🌟', '🎯', '💪', '✨', '🔥'];
+
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await ProfileCacheService.getCachedUserProfile();
+    setState(() {
+      _user = user;
+    });
+  }
 
   Future<void> _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -67,6 +77,38 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       setState(() {
         _selectedTime = picked;
       });
+    }
+  }
+
+  void _saveHabit() async {
+    if (_user == null) return; // Or show error
+
+    final habit = Habit(
+      title: _titleController.text.trim(),
+      notes: _notesController.text.trim(),
+      owner: _user!.id,
+      sharedWith: const [], // You can update this if you have collaborators
+      repeatPattern: _selectedRepeat.toLowerCase(),
+      color: '#${_selectedColor.value.toRadixString(16).padLeft(8, '0')}',
+      createdAt: DateTime.now(),
+      reminders: _reminder
+          ? [
+              // Example: combine date and time to a string, or use your own logic
+              DateTime(
+                _selectedDate.year,
+                _selectedDate.month,
+                _selectedDate.day,
+                _selectedTime.hour,
+                _selectedTime.minute,
+              ).toIso8601String()
+            ]
+          : [],
+    );
+
+    await ref.read(habitControllerProvider.notifier).createHabit(habit);
+
+    if (mounted) {
+      widget.onHabitAdded!();
     }
   }
 
@@ -105,16 +147,6 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                 subTextColor: subTextColor,
               ),
               const SizedBox(height: 20),
-              _CategorySection(
-                categories: _categories,
-                categoryIcons: _categoryIcons,
-                selectedCategory: _selectedCategory,
-                onCategorySelected: (cat) {
-                  setState(() {
-                    _selectedCategory = cat;
-                  });
-                },
-              ),
               const SizedBox(height: 24),
               DateTimeRepeatSection(
                 cardColor: cardColor,
@@ -168,17 +200,13 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                     _selectedColor = color;
                   });
                 },
-                emojiOptions: _emojiOptions,
-                selectedEmoji: _selectedEmoji,
-                onEmojiSelected: (emoji) {
-                  setState(() {
-                    _selectedEmoji = emoji;
-                  });
-                },
                 notesController: _notesController,
               ),
               const SizedBox(height: 28),
-              _SaveButton(theme: theme),
+              _SaveButton(
+                theme: theme,
+                onPressed: _saveHabit,
+              ),
               const SizedBox(height: 18),
             ],
           ),
@@ -296,7 +324,8 @@ class _CategorySection extends StatelessWidget {
 // Save Button Section
 class _SaveButton extends StatelessWidget {
   final ThemeData theme;
-  const _SaveButton({required this.theme});
+  final VoidCallback onPressed;
+  const _SaveButton({required this.theme, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +338,7 @@ class _SaveButton extends StatelessWidget {
       height: 56,
       child: ElevatedButton(
         onPressed: () {
-          // Save logic here
+          onPressed();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Habit saved!')),
           );

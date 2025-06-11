@@ -177,7 +177,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 await ref.read(authControllerProvider.notifier).logout();
                 if (mounted) {
                   Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => SplashScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const SplashScreen()),
                       (route) => false);
                 }
               },
