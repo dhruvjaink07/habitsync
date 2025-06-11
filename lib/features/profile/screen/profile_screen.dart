@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/features/auth/controller/auth_controller.dart';
 import 'package:habitsync/features/profile/controller/profile_controller.dart';
-import 'package:habitsync/features/profile/widgets/achievements_tab.dart';
 import 'package:habitsync/features/profile/widgets/action_button.dart';
 import 'package:habitsync/features/profile/widgets/friends_tab.dart';
 import 'package:habitsync/features/profile/widgets/habit_card_tab.dart';
@@ -13,6 +12,7 @@ import 'package:habitsync/features/auth/domain/user_model.dart';
 import 'package:habitsync/services/image_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:habitsync/features/habits/controller/habit_controller.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final VoidCallback? onAddHabitTap;
@@ -29,7 +29,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => _refreshProfile());
+    Future.microtask(() async {
+      await _refreshProfile();
+      await _fetchHabits();
+    });
+  }
+
+  Future<void> _fetchHabits() async {
+    if (_user != null) {
+      await ref
+          .read(habitControllerProvider.notifier)
+          .getHabitsByOwner(_user!.id);
+    }
   }
 
   Future<void> _refreshProfile() async {
@@ -126,6 +137,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final textColor = theme.textTheme.bodyLarge?.color ?? Colors.white;
     final subTextColor = theme.textTheme.bodyMedium?.color ?? Colors.white70;
     final cardColor = theme.cardColor;
+
+    final habitsAsync = ref.watch(habitControllerProvider);
 
     return DefaultTabController(
       length: 3,
@@ -274,17 +287,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 tabs: const [
                   Tab(text: 'My Habits'),
                   Tab(text: 'Friends'),
-                  Tab(text: 'Achievements'),
+                  // Tab(text: 'Achievements'),
                 ],
               ),
               SizedBox(
                 height: 400, // Adjust as needed
                 child: TabBarView(
                   children: [
-                    HabitsTab(
-                        onAddHabit: widget.onAddHabitTap), // Pass callback here
+                    habitsAsync.when(
+                      data: (habits) => HabitsTab(
+                        habits: habits,
+                        onAddHabit: widget.onAddHabitTap,
+                      ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (e, st) => Center(child: Text('Error: $e')),
+                    ),
                     const FriendsTab(),
-                    const AchievementsTab(),
+                    // const AchievementsTab(),
                   ],
                 ),
               ),

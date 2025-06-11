@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 // Habit Card Widget (responsive, public)
-class HabitCard extends StatelessWidget {
+class HabitDisplayCard extends StatelessWidget {
   final String title;
   final String progress;
   final String time;
   final List<String> avatars;
 
-  const HabitCard({
+  const HabitDisplayCard({
     super.key,
     required this.title,
     required this.progress,

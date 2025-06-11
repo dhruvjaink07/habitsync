@@ -1,12 +1,14 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:habitsync/features/habits/domain/habit_model.dart';
 import 'package:habitsync/features/profile/widgets/habit_display_card.dart';
 
 // Habits Tab Widget (responsive)
 class HabitsTab extends StatelessWidget {
+  final List<Habit> habits;
   final VoidCallback? onAddHabit;
 
-  const HabitsTab({super.key, this.onAddHabit});
+  const HabitsTab({super.key, required this.habits, this.onAddHabit});
 
   @override
   Widget build(BuildContext context) {
@@ -23,37 +25,21 @@ class HabitsTab extends StatelessWidget {
             crossAxisSpacing: 16,
             childAspectRatio: 1.2,
             children: [
-              const HabitCard(
-                title: 'Morning Meditation',
-                progress: '12/30 days',
-                time: '7:00 AM',
-                avatars: [
-                  'https://randomuser.me/api/portraits/men/1.jpg',
-                  'https://randomuser.me/api/portraits/women/2.jpg',
-                  'https://randomuser.me/api/portraits/men/3.jpg',
-                ],
-              ),
-              const HabitCard(
-                title: 'Read Books',
-                progress: '8/30 days',
-                time: '8:00 PM',
-                avatars: [
-                  'https://randomuser.me/api/portraits/women/4.jpg',
-                  'https://randomuser.me/api/portraits/men/5.jpg',
-                ],
-              ),
-              const HabitCard(
-                title: 'Exercise',
-                progress: '15/30 days',
-                time: '6:00 AM',
-                avatars: [
-                  'https://randomuser.me/api/portraits/men/6.jpg',
-                  'https://randomuser.me/api/portraits/women/7.jpg',
-                ],
-              ),
+              ...habits.map((habit) => HabitDisplayCard(
+                    title: habit.title,
+                    progress:
+                        '', // You can calculate progress if you have the data
+                    time: habit.reminders.isNotEmpty
+                        ? TimeOfDay.fromDateTime(
+                                DateTime.parse(habit.reminders.first))
+                            .format(context)
+                        : '',
+                    avatars: habit
+                        .sharedWith, // If you want to show collaborators' avatars, map them here
+                  )),
               // Add New Habit Card
               GestureDetector(
-                onTap: onAddHabit, // This will now switch the tab!
+                onTap: onAddHabit,
                 child: DottedBorder(
                   color: theme.dividerColor,
                   borderType: BorderType.RRect,
