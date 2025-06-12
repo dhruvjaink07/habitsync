@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/features/friends/controller/friend_controller.dart';
+import 'package:habitsync/services/profile_cache_service.dart';
 
 // --- Search Friends Section ---
 class SearchFriendsSection extends ConsumerStatefulWidget {
@@ -16,6 +17,20 @@ class SearchFriendsSection extends ConsumerStatefulWidget {
 class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
   final TextEditingController _controller = TextEditingController();
   final Set<String> requestedIds = {};
+  String? currentUserId; // Store the user ID
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUserId();
+  }
+
+  Future<void> _loadCurrentUserId() async {
+    final user = await ProfileCacheService.getCachedUserProfile();
+    setState(() {
+      currentUserId = user?.id;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +38,6 @@ class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
     final searchAsync = ref.watch(searchFriendsProvider);
     final friendsAsync = ref.watch(friendControllerProvider);
 
-    // Get the list of friend IDs (if loaded)
     final friendIds = friendsAsync.maybeWhen(
       data: (friends) => friends.map((f) => f.id).toSet(),
       orElse: () => <String>{},
@@ -70,6 +84,7 @@ class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
                   children: results.map((user) {
                     final isFriend = friendIds.contains(user.id);
                     final isRequested = requestedIds.contains(user.id);
+                    final isSelf = user.id == currentUserId;
                     return Card(
                       color: theme.cardColor,
                       elevation: 0,
@@ -82,8 +97,7 @@ class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
                             horizontal: 12, vertical: 8),
                         leading: CircleAvatar(
                           radius: 24,
-                          backgroundImage: (user.avatar != null &&
-                                  user.avatar.startsWith('http'))
+                          backgroundImage: (user.avatar.startsWith('http'))
                               ? CachedNetworkImageProvider(user.avatar)
                               : const AssetImage(
                                       'assets/images/default_avatar.png')
@@ -95,69 +109,71 @@ class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
                               ?.copyWith(fontWeight: FontWeight.w500),
                         ),
                         subtitle: Text(user.username),
-                        trailing: isFriend
-                            ? const Text(
-                                '😎 Friends',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )
-                            : isRequested
+                        trailing: isSelf
+                            ? null
+                            : isFriend
                                 ? const Text(
-                                    'Requested',
+                                    '😎 Friends',
                                     style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.orange,
+                                      fontSize: 16,
+                                      color: Colors.green,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   )
-                                : ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(24)),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 18, vertical: 8),
-                                      elevation: 0,
-                                    ),
-                                    onPressed: () async {
-                                      try {
-                                        await ref
-                                            .read(friendControllerProvider
-                                                .notifier)
-                                            .sendFriendRequest(user.id);
-                                        setState(() {
-                                          requestedIds.add(user.id);
-                                        });
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                            content: Text(
-                                              'Friend request sent to ${user.name}.',
-                                              selectionColor: Colors.green,
-                                            ),
-                                          ));
-                                        }
-                                      } catch (e) {
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                  'Failed to send request.'),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    },
-                                    child: const Text('+ Add Friend',
-                                        style: TextStyle(fontSize: 15)),
-                                  ),
+                                : isRequested
+                                    ? const Text(
+                                        'Requested',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )
+                                    : ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.primary,
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(24)),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 18, vertical: 8),
+                                          elevation: 0,
+                                        ),
+                                        onPressed: () async {
+                                          try {
+                                            await ref
+                                                .read(friendControllerProvider
+                                                    .notifier)
+                                                .sendFriendRequest(user.id);
+                                            setState(() {
+                                              requestedIds.add(user.id);
+                                            });
+                                            if (mounted) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(SnackBar(
+                                                content: Text(
+                                                  'Friend request sent to ${user.name}.',
+                                                  selectionColor: Colors.green,
+                                                ),
+                                              ));
+                                            }
+                                          } catch (e) {
+                                            if (mounted) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                      'Failed to send request.'),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+                                        child: const Text('+ Add Friend',
+                                            style: TextStyle(fontSize: 15)),
+                                      ),
                       ),
                     );
                   }).toList(),

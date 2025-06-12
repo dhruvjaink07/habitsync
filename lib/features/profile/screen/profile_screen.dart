@@ -16,8 +16,8 @@ import 'package:habitsync/features/habits/controller/habit_controller.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final VoidCallback? onAddHabitTap;
-
-  const ProfileScreen({super.key, this.onAddHabitTap});
+  final VoidCallback? onAddFriendTap;
+  const ProfileScreen({super.key, this.onAddHabitTap, this.onAddFriendTap});
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -141,7 +141,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final habitsAsync = ref.watch(habitControllerProvider);
 
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SingleChildScrollView(
@@ -226,7 +226,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  'Habit Master',
+                  _user?.bio ?? 'Habit Master',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: textColor,
                     fontSize: 14,
@@ -264,14 +264,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ActionButton(
-                          label: 'Edit Goals', icon: Icons.flag, onTap: () {}),
-                      const SizedBox(width: 8),
-                      ActionButton(
-                          label: 'Share Profile',
-                          icon: Icons.share,
-                          onTap: () {}),
-                      const SizedBox(width: 8),
+                      // Will keep it commented for now
+                      // ActionButton(
+                      //     label: 'Share Profile',
+                      //     icon: Icons.share,
+                      //     onTap: () {}),
+                      // const SizedBox(width: 8),
                       ActionButton(
                           label: 'Sync Habits', icon: Icons.sync, onTap: () {}),
                     ],
@@ -303,7 +301,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           const Center(child: CircularProgressIndicator()),
                       error: (e, st) => Center(child: Text('Error: $e')),
                     ),
-                    const FriendsTab(),
+                    FriendsTab(
+                      onAddFriend: widget.onAddFriendTap,
+                    ),
                     // const AchievementsTab(),
                   ],
                 ),

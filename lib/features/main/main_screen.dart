@@ -35,11 +35,13 @@ class _MainScreenState extends State<MainScreen> {
       ),
       AddHabitScreen(
         onHabitAdded: () => _onItemTapped(0),
+        onAddCollaborator: () => _onItemTapped(3),
       ),
       const StatsScreen(),
       const FriendsScreen(),
       ProfileScreen(
-        onAddHabitTap: () => _onItemTapped(1), // 1 is the AddHabitScreen index
+        onAddHabitTap: () => _onItemTapped(1),
+        onAddFriendTap: () => _onItemTapped(3),
       ),
     ];
 

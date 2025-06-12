@@ -5,7 +5,6 @@ class FriendCard extends StatelessWidget {
   final String name;
   final String username;
   final int sharedCount;
-  final String timeAgo;
 
   const FriendCard({
     super.key,
@@ -13,7 +12,6 @@ class FriendCard extends StatelessWidget {
     required this.name,
     required this.username,
     required this.sharedCount,
-    required this.timeAgo,
   });
 
   @override
@@ -54,9 +52,6 @@ class FriendCard extends StatelessWidget {
             children: [
               Text('$sharedCount shared',
                   style: theme.textTheme.bodySmall?.copyWith(color: textColor)),
-              Text(timeAgo,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: subTextColor, fontSize: 12)),
             ],
           ),
         ],

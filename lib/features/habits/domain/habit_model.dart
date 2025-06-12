@@ -1,55 +1,91 @@
+import 'package:habitsync/features/auth/domain/user_model.dart';
+
 class Habit {
-  final String id;
+  final String? id;
   final String title;
   final String notes;
-  final String owner;
-  final List<String> sharedWith;
+  final User owner;
+  final List<User> sharedWith;
   final String repeatPattern;
   final String color;
   final DateTime createdAt;
   final List<String> reminders;
 
+  // Main constructor (for fetched habits)
   Habit({
-    this.id = '',
+    this.id,
     required this.title,
-    this.notes = '',
+    required this.notes,
     required this.owner,
-    this.sharedWith = const [],
+    required this.sharedWith,
     this.repeatPattern = 'daily',
     this.color = '#2196f3',
     DateTime? createdAt,
     this.reminders = const [],
   }) : createdAt = createdAt ?? DateTime.now();
 
-  factory Habit.fromJson(Map<String, dynamic> json) {
-    return Habit(
-      id: json['_id'] ?? '',
-      title: json['title'] ?? '',
-      notes: json['notes'] ?? '',
-      owner: json['owner'] ?? '',
-      sharedWith: (json['sharedWith'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      repeatPattern: json['repeatPattern'] ?? 'daily',
-      color: json['color'] ?? '#2196f3',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : DateTime.now(),
-      reminders: (json['reminders'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-    );
-  }
+  // Named constructor for creation (using IDs)
+  Habit.create({
+    this.id,
+    required this.title,
+    required this.notes,
+    required String ownerId,
+    required List<String> sharedWithIds,
+    this.repeatPattern = 'daily',
+    this.color = '#2196f3',
+    DateTime? createdAt,
+    this.reminders = const [],
+  })  : owner = User(
+          id: ownerId,
+          name: '',
+          email: '',
+          avatar: '',
+          username: '',
+          bio: '',
+          streak: 0,
+          friends: const [],
+          joinedAt: DateTime.now().toIso8601String(),
+        ),
+        sharedWith = sharedWithIds
+            .map((id) => User(
+                  id: id,
+                  name: '',
+                  email: '',
+                  avatar: '',
+                  username: '',
+                  bio: '',
+                  streak: 0,
+                  friends: const [],
+                  joinedAt: DateTime.now().toIso8601String(),
+                ))
+            .toList(),
+        createdAt = createdAt ?? DateTime.now();
+
+  factory Habit.fromJson(Map<String, dynamic> json) => Habit(
+        id: json['_id'],
+        title: json['title'],
+        notes: json['notes'],
+        owner: User.fromJson(json['owner']),
+        sharedWith:
+            (json['sharedWith'] as List).map((u) => User.fromJson(u)).toList(),
+        repeatPattern: json['repeatPattern'] ?? 'daily',
+        color: json['color'] ?? '#2196f3',
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'])
+            : DateTime.now(),
+        reminders: (json['reminders'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            [],
+      );
 
   Map<String, dynamic> toJson() {
     return {
-      '_id': id,
+      if (id != null) '_id': id,
       'title': title,
       'notes': notes,
-      'owner': owner,
-      'sharedWith': sharedWith,
+      'owner': owner.id, // Only send the ID for creation
+      'sharedWith': sharedWith.map((u) => u.id).toList(),
       'repeatPattern': repeatPattern,
       'color': color,
       'createdAt': createdAt.toIso8601String(),
@@ -61,8 +97,8 @@ class Habit {
     String? id,
     String? title,
     String? notes,
-    String? owner,
-    List<String>? sharedWith,
+    User? owner,
+    List<User>? sharedWith,
     String? repeatPattern,
     String? color,
     DateTime? createdAt,

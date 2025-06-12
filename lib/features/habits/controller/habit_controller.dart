@@ -32,8 +32,6 @@ class HabitController extends StateNotifier<AsyncValue<List<Habit>>> {
     }
   }
 
-// ...existing code...
-
   Future<Habit?> getHabitById(String habitId) async {
     try {
       final habit = await _habitRepository.getHabitById(habitId);
@@ -44,14 +42,12 @@ class HabitController extends StateNotifier<AsyncValue<List<Habit>>> {
     }
   }
 
-// ...existing code...
-
   Future<void> createHabit(Habit habit) async {
     state = const AsyncValue.loading();
     try {
       await _habitRepository.createHabit(habit);
       // Refresh the list after creation
-      final ownerId = habit.owner;
+      final ownerId = habit.owner.id; // <-- FIXED
       final habits = await _habitRepository.getHabitsByOwnerId(ownerId);
       state = AsyncValue.data(habits);
     } catch (e, st) {
@@ -64,7 +60,7 @@ class HabitController extends StateNotifier<AsyncValue<List<Habit>>> {
     try {
       await _habitRepository.updateHabit(habit);
       // Refresh the list after update
-      final ownerId = habit.owner;
+      final ownerId = habit.owner.id; // <-- FIXED
       final habits = await _habitRepository.getHabitsByOwnerId(ownerId);
       state = AsyncValue.data(habits);
     } catch (e, st) {

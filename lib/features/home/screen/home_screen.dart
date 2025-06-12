@@ -72,7 +72,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Navigator.of(context).pop();
           await ref
               .read(habitControllerProvider.notifier)
-              .deleteHabit(habit.id, habit.owner);
+              .deleteHabit(habit.id!, habit.owner.id);
           // Optionally show a snackbar
         },
       ),
@@ -185,12 +185,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           // Personal
                           ListView.builder(
                             itemCount: habits
-                                .where((h) => !h.sharedWith.contains(_user?.id))
+                                .where((h) =>
+                                    h.sharedWith.isEmpty &&
+                                    h.owner.id == _user?.id)
                                 .length,
                             itemBuilder: (context, index) {
                               final habit = habits
-                                  .where(
-                                      (h) => !h.sharedWith.contains(_user?.id))
+                                  .where((h) =>
+                                      h.sharedWith.isEmpty &&
+                                      h.owner.id == _user?.id)
                                   .toList()[index];
                               return HabitCard(
                                 habit: habit,
@@ -202,12 +205,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           // Shared
                           ListView.builder(
                             itemCount: habits
-                                .where((h) => h.sharedWith.contains(_user?.id))
+                                .where((h) =>
+                                    h.sharedWith.isNotEmpty &&
+                                    h.owner.id == _user?.id)
                                 .length,
                             itemBuilder: (context, index) {
                               final habit = habits
-                                  .where(
-                                      (h) => h.sharedWith.contains(_user?.id))
+                                  .where((h) =>
+                                      h.sharedWith.isNotEmpty &&
+                                      h.owner.id == _user?.id)
                                   .toList()[index];
                               return HabitCard(
                                 habit: habit,

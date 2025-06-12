@@ -12,7 +12,8 @@ import 'package:habitsync/services/profile_cache_service.dart';
 
 class AddHabitScreen extends ConsumerStatefulWidget {
   final VoidCallback? onHabitAdded;
-  const AddHabitScreen({super.key, this.onHabitAdded});
+  final VoidCallback? onAddCollaborator;
+  const AddHabitScreen({super.key, this.onHabitAdded, this.onAddCollaborator});
 
   @override
   ConsumerState<AddHabitScreen> createState() => _AddHabitScreenState();
@@ -26,11 +27,10 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
   TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
 
   String _selectedRepeat = 'Daily';
-  String _selectedPermission = 'Edit';
   bool _reminder = true;
   Color _selectedColor = AppColors.primary;
-  final List<String> _repeatOptions = ['Daily', 'Weekly', 'Custom'];
-  final List<String> _permissionOptions = ['Edit', 'View', 'Updates'];
+  final List<String> _repeatOptions = ['Daily', 'Weekly'];
+  // final List<String> _permissionOptions = ['Edit', 'View', 'Updates'];
   final List<Color> _colorOptions = [
     AppColors.primary,
     AppColors.readingColor,
@@ -40,6 +40,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
   ];
 
   User? _user;
+  List<String> _selectedCollaboratorIds = []; // <-- Add this
 
   @override
   void initState() {
@@ -83,11 +84,11 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
   void _saveHabit() async {
     if (_user == null) return; // Or show error
 
-    final habit = Habit(
+    final habit = Habit.create(
       title: _titleController.text.trim(),
       notes: _notesController.text.trim(),
-      owner: _user!.id,
-      sharedWith: const [], // You can update this if you have collaborators
+      ownerId: _user!.id,
+      sharedWithIds: _selectedCollaboratorIds, // <-- Use selected collaborators
       repeatPattern: _selectedRepeat.toLowerCase(),
       color: '#${_selectedColor.value.toRadixString(16).padLeft(8, '0')}',
       createdAt: DateTime.now(),
@@ -177,15 +178,15 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                     _reminder = val;
                   });
                 },
-                selectedPermission: _selectedPermission,
-                permissionOptions: _permissionOptions,
-                onPermissionSelected: (val) {
-                  setState(() {
-                    _selectedPermission = val;
-                  });
-                },
                 primary: primary,
                 theme: theme,
+                // Add this callback:
+                onCollaboratorsChanged: (ids) {
+                  setState(() {
+                    _selectedCollaboratorIds = ids;
+                  });
+                },
+                onAddCollaborator: widget.onAddCollaborator,
               ),
               const SizedBox(height: 18),
               ColorEmojiNotesSection(

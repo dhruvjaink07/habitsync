@@ -8,7 +8,7 @@ class DioService {
 
   DioService._internal() {
     final options = BaseOptions(
-      baseUrl: 'http://192.168.248.140:5000',
+      baseUrl: 'http://192.168.248.114:5000',
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 15),
       headers: {
