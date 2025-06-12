@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/core/color/colors.dart';
-import 'package:habitsync/features/auth/domain/user_model.dart';
-import 'package:habitsync/features/friends/controller/friend_controller.dart';
 import 'package:habitsync/features/habits/domain/habit_model.dart';
-import 'package:habitsync/services/profile_cache_service.dart';
 
-class HabitDetailDialog extends ConsumerStatefulWidget {
+class HabitDetailDialog extends StatefulWidget {
   final Habit habit;
   final Future<void> Function(Habit updatedHabit) onUpdate;
   final VoidCallback onDelete;
@@ -19,15 +15,13 @@ class HabitDetailDialog extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<HabitDetailDialog> createState() => _HabitDetailDialogState();
+  State<HabitDetailDialog> createState() => _HabitDetailDialogState();
 }
 
-class _HabitDetailDialogState extends ConsumerState<HabitDetailDialog> {
+class _HabitDetailDialogState extends State<HabitDetailDialog> {
   late bool isEditing;
   late TextEditingController _titleController;
   late TextEditingController _notesController;
-  List<User>? sharedUsers;
-  User? ownerUser;
 
   @override
   void initState() {
@@ -35,37 +29,6 @@ class _HabitDetailDialogState extends ConsumerState<HabitDetailDialog> {
     isEditing = false;
     _titleController = TextEditingController(text: widget.habit.title);
     _notesController = TextEditingController(text: widget.habit.notes);
-    _loadUsers();
-  }
-
-  Future<void> _loadUsers() async {
-    final currentUser = await ProfileCacheService.getCachedUserProfile();
-    final friendsAsync = ref.read(friendControllerProvider);
-
-    // Owner logic
-    if (widget.habit.owner == currentUser?.id) {
-      ownerUser = currentUser;
-    } else if (friendsAsync is AsyncData<List<User>>) {
-      ownerUser = friendsAsync.value.firstWhere(
-        (u) => u.id == widget.habit.owner,
-      );
-    }
-
-    // Collaborators logic
-    sharedUsers = [];
-    if (friendsAsync is AsyncData<List<User>>) {
-      for (final id in widget.habit.sharedWith) {
-        if (id == currentUser?.id) {
-          sharedUsers!.add(currentUser!);
-        } else {
-          final user = friendsAsync.value.firstWhere(
-            (u) => u.id == id,
-          );
-          if (user != null) sharedUsers!.add(user);
-        }
-      }
-    }
-    setState(() {});
   }
 
   @override
@@ -113,20 +76,6 @@ class _HabitDetailDialogState extends ConsumerState<HabitDetailDialog> {
     Navigator.of(context).pop(); // Optionally close dialog after save
   }
 
-  Widget _buildInfoTile(
-      {required IconData icon, required Widget title, Widget? trailing}) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
-      leading:
-          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 22),
-      title: title,
-      trailing: trailing,
-      dense: true,
-      visualDensity: VisualDensity.compact,
-      minLeadingWidth: 0,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -153,122 +102,134 @@ class _HabitDetailDialogState extends ConsumerState<HabitDetailDialog> {
               ),
               const SizedBox(height: 16),
               Center(
-                child: Text(
-                  widget.habit.title,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                child: isEditing
+                    ? TextFormField(
+                        controller: _titleController,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Title",
+                        ),
+                      )
+                    : Text(
+                        widget.habit.title,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
               ),
-              const SizedBox(height: 8),
-              if (widget.habit.notes.isNotEmpty)
+              if (widget.habit.notes.isNotEmpty || isEditing) ...[
+                const SizedBox(height: 8),
                 Center(
-                  child: Text(
-                    widget.habit.notes,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark
-                          ? AppColors.subtextDark
-                          : AppColors.subtextLight,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  child: isEditing
+                      ? TextFormField(
+                          controller: _notesController,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isDark
+                                ? AppColors.subtextDark
+                                : AppColors.subtextLight,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Notes",
+                          ),
+                        )
+                      : Text(
+                          widget.habit.notes,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isDark
+                                ? AppColors.subtextDark
+                                : AppColors.subtextLight,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                 ),
-              const SizedBox(height: 18),
-              Text("Details",
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              Card(
-                color: isDark
-                    ? AppColors.cardDark.withOpacity(0.7)
-                    : AppColors.cardLight.withOpacity(0.7),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: Column(
-                  children: [
-                    _buildInfoTile(
-                      icon: Icons.repeat,
-                      title: Text(widget.habit.repeatPattern,
-                          style: theme.textTheme.bodyLarge),
-                    ),
-                    _buildInfoTile(
-                      icon: Icons.calendar_today,
-                      title: Text(
-                          "${widget.habit.createdAt.toLocal()}"
-                              .split('.')
-                              .first,
-                          style: theme.textTheme.bodyLarge),
-                    ),
-                    _buildInfoTile(
-                      icon: Icons.alarm,
-                      title: Text(
-                        widget.habit.reminders.isNotEmpty
-                            ? widget.habit.reminders.join('\n')
-                            : "None",
-                        style: theme.textTheme.bodyLarge,
-                      ),
-                    ),
-                  ],
+              ],
+              const Divider(height: 32, thickness: 1),
+              _buildInfoRow(
+                context,
+                icon: Icons.repeat,
+                label: "Repeat",
+                valueWidget: Text(widget.habit.repeatPattern,
+                    style: theme.textTheme.bodyLarge),
+              ),
+              _buildInfoRow(
+                context,
+                icon: Icons.calendar_today,
+                label: "Created",
+                valueWidget: Text(
+                    "${widget.habit.createdAt.toLocal()}".split('.').first,
+                    style: theme.textTheme.bodyLarge),
+              ),
+              _buildInfoRow(
+                context,
+                icon: Icons.alarm,
+                label: "Reminders",
+                valueWidget: Text(
+                  widget.habit.reminders.isNotEmpty
+                      ? widget.habit.reminders.join('\n')
+                      : "None",
+                  style: theme.textTheme.bodyLarge,
                 ),
               ),
-              const SizedBox(height: 18),
-              Text("Collaborators",
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              Card(
-                color: isDark
-                    ? AppColors.cardDark.withOpacity(0.7)
-                    : AppColors.cardLight.withOpacity(0.7),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: Column(
-                  children: [
-                    _buildInfoTile(
-                      icon: Icons.person,
-                      title: UserChip(
-                        name: widget.habit.owner.name,
-                        avatarUrl: widget.habit.owner.avatar,
-                      ),
-                    ),
-                    _buildInfoTile(
-                      icon: Icons.group,
-                      title: widget.habit.sharedWith.isEmpty
-                          ? const Text("None")
-                          : Wrap(
-                              spacing: 4,
-                              children: widget.habit.sharedWith
-                                  .map((u) => UserChip(
-                                      name: u.name, avatarUrl: u.avatar))
-                                  .toList(),
-                            ),
-                    ),
-                  ],
+              _buildInfoRow(
+                context,
+                icon: Icons.person,
+                label: "Owner",
+                valueWidget:
+                    Text(widget.habit.owner, style: theme.textTheme.bodyLarge),
+              ),
+              _buildInfoRow(
+                context,
+                icon: Icons.group,
+                label: "Shared With",
+                valueWidget: Text(
+                  widget.habit.sharedWith.isNotEmpty
+                      ? widget.habit.sharedWith.join(', ')
+                      : "None",
+                  style: theme.textTheme.bodyLarge,
                 ),
               ),
               const SizedBox(height: 28),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ElevatedButton.icon(
-                    onPressed: isEditing ? _save : _toggleEdit,
-                    icon: Icon(isEditing ? Icons.save : Icons.edit),
-                    label: Text(isEditing ? "Save" : "Edit"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                    ),
-                  ),
+                  isEditing
+                      ? ElevatedButton.icon(
+                          onPressed: _save,
+                          icon: const Icon(Icons.save),
+                          label: const Text("Save"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                          ),
+                        )
+                      : ElevatedButton.icon(
+                          onPressed: _toggleEdit,
+                          icon: const Icon(Icons.edit),
+                          label: const Text("Edit"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                          ),
+                        ),
                   ElevatedButton.icon(
                     onPressed: widget.onDelete,
                     icon: const Icon(Icons.delete),
@@ -288,26 +249,6 @@ class _HabitDetailDialogState extends ConsumerState<HabitDetailDialog> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class UserChip extends StatelessWidget {
-  final String name;
-  final String avatarUrl;
-  const UserChip({super.key, required this.name, required this.avatarUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Chip(
-      avatar: CircleAvatar(
-        backgroundImage: avatarUrl.startsWith('http')
-            ? NetworkImage(avatarUrl)
-            : AssetImage('assets/images/default_avatar.png') as ImageProvider,
-        radius: 12,
-      ),
-      label: Text(name, style: const TextStyle(fontSize: 13)),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
     );
   }
 }

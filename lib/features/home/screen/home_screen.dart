@@ -72,7 +72,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Navigator.of(context).pop();
           await ref
               .read(habitControllerProvider.notifier)
-              .deleteHabit(habit.id!, habit.owner.id);
+              .deleteHabit(habit.id, habit.owner);
           // Optionally show a snackbar
         },
       ),
@@ -187,13 +187,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             itemCount: habits
                                 .where((h) =>
                                     h.sharedWith.isEmpty &&
-                                    h.owner.id == _user?.id)
+                                    h.owner == _user?.id)
                                 .length,
                             itemBuilder: (context, index) {
                               final habit = habits
                                   .where((h) =>
                                       h.sharedWith.isEmpty &&
-                                      h.owner.id == _user?.id)
+                                      h.owner == _user?.id)
                                   .toList()[index];
                               return HabitCard(
                                 habit: habit,
@@ -207,13 +207,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             itemCount: habits
                                 .where((h) =>
                                     h.sharedWith.isNotEmpty &&
-                                    h.owner.id == _user?.id)
+                                    h.owner == _user?.id)
                                 .length,
                             itemBuilder: (context, index) {
                               final habit = habits
                                   .where((h) =>
                                       h.sharedWith.isNotEmpty &&
-                                      h.owner.id == _user?.id)
+                                      h.owner == _user?.id)
                                   .toList()[index];
                               return HabitCard(
                                 habit: habit,

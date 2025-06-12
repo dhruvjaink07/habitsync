@@ -150,7 +150,8 @@ class _ReminderCollaboratorsPermissionSectionState
                           avatar: CircleAvatar(
                             backgroundImage: f.avatar.startsWith('http')
                                 ? NetworkImage(f.avatar)
-                                : AssetImage('assets/images/default_avatar.png')
+                                : const AssetImage(
+                                        'assets/images/default_avatar.png')
                                     as ImageProvider,
                           ),
                           onDeleted: () {
@@ -164,19 +165,6 @@ class _ReminderCollaboratorsPermissionSectionState
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          // Permission Section (unchanged)
-          Row(
-            children: [
-              Icon(Icons.lock_rounded, color: widget.subTextColor, size: 22),
-              const SizedBox(width: 10),
-              Text('Permission Settings',
-                  style: widget.theme.textTheme.bodyLarge
-                      ?.copyWith(color: widget.textColor, fontSize: 16)),
-            ],
-          ),
-          const SizedBox(height: 14),
-          // ...permission options...
         ],
       ),
     );

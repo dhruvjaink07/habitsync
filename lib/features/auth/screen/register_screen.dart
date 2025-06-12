@@ -361,7 +361,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               _step = 0;
                             });
                           },
-                          child: Text("Back"),
+                          child: const Text("Back"),
                         ),
                       ],
                     ),

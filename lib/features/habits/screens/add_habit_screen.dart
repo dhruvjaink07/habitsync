@@ -84,11 +84,11 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
   void _saveHabit() async {
     if (_user == null) return; // Or show error
 
-    final habit = Habit.create(
+    final habit = Habit(
       title: _titleController.text.trim(),
       notes: _notesController.text.trim(),
-      ownerId: _user!.id,
-      sharedWithIds: _selectedCollaboratorIds, // <-- Use selected collaborators
+      owner: _user!.id,
+      sharedWith: _selectedCollaboratorIds, // <-- Use selected collaborators
       repeatPattern: _selectedRepeat.toLowerCase(),
       color: '#${_selectedColor.value.toRadixString(16).padLeft(8, '0')}',
       createdAt: DateTime.now(),

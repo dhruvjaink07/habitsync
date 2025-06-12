@@ -162,7 +162,7 @@ class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
                                             if (mounted) {
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
-                                                SnackBar(
+                                                const SnackBar(
                                                   content: Text(
                                                       'Failed to send request.'),
                                                   backgroundColor: Colors.red,

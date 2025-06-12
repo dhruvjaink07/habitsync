@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/features/friends/widgets/friend_list_section.dart';
 import 'package:habitsync/features/friends/widgets/friend_request_section.dart';
 import 'package:habitsync/features/friends/widgets/search_friend_section.dart';
