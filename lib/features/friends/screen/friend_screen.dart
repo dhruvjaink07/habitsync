@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitsync/features/friends/screen/friend_qr_scanner_screen.dart';
 import 'package:habitsync/features/friends/widgets/friend_list_section.dart';
 import 'package:habitsync/features/friends/widgets/friend_request_section.dart';
 import 'package:habitsync/features/friends/widgets/search_friend_section.dart';
@@ -12,6 +13,7 @@ class FriendsScreen extends StatefulWidget {
 
 class _FriendsScreenState extends State<FriendsScreen> {
   int _sectionIndex = 0; // 0: Friends, 1: Search, 2: Requests
+  String? _qrSearchUserId; // To store the scanned user ID
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +42,25 @@ class _FriendsScreenState extends State<FriendsScreen> {
         actions: isFriends
             ? [
                 IconButton(
+                  icon:
+                      Icon(Icons.qr_code_scanner, color: theme.iconTheme.color),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FriendQrScannerScreen(),
+                      ),
+                    );
+                    if (result != null && result is String) {
+                      setState(() {
+                        _sectionIndex = 1; // Switch to search section
+                        _qrSearchUserId = result; // Store the scanned user ID
+                      });
+                    }
+                  },
+                  tooltip: 'Scan QR',
+                ),
+                IconButton(
                   icon: Icon(Icons.search, color: theme.iconTheme.color),
                   onPressed: () => setState(() => _sectionIndex = 1),
                   tooltip: 'Search Friends',
@@ -65,7 +86,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                           minHeight: 18,
                         ),
                         child: const Text(
-                          '3',
+                          '0',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 12,
@@ -93,7 +114,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           child: _sectionIndex == 0
               ? const FriendsListSection()
               : _sectionIndex == 1
-                  ? const SearchFriendsSection()
+                  ? SearchFriendsSection(initialQuery: _qrSearchUserId)
                   : const FriendRequestsSection(),
         ),
       ),

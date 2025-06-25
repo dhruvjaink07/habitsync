@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +8,8 @@ import 'package:habitsync/services/profile_cache_service.dart';
 
 // --- Search Friends Section ---
 class SearchFriendsSection extends ConsumerStatefulWidget {
-  const SearchFriendsSection({super.key});
+  final String? initialQuery;
+  const SearchFriendsSection({super.key, this.initialQuery});
 
   @override
   ConsumerState<SearchFriendsSection> createState() =>
@@ -17,12 +19,27 @@ class SearchFriendsSection extends ConsumerStatefulWidget {
 class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
   final TextEditingController _controller = TextEditingController();
   final Set<String> requestedIds = {};
-  String? currentUserId; // Store the user ID
+  String? currentUserId;
+  Timer? _debounce; // Add this line
 
   @override
   void initState() {
     super.initState();
     _loadCurrentUserId();
+    if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+      _controller.text = widget.initialQuery!;
+      // Debounce logic: immediately search for the user ID
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(searchFriendsProvider.notifier).search(widget.initialQuery!);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel(); // Clean up the timer
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCurrentUserId() async {
@@ -61,7 +78,11 @@ class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
                 const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
           ),
           onChanged: (query) {
-            ref.read(searchFriendsProvider.notifier).search(query);
+            // Debounce logic
+            if (_debounce?.isActive ?? false) _debounce!.cancel();
+            _debounce = Timer(const Duration(milliseconds: 500), () {
+              ref.read(searchFriendsProvider.notifier).search(query);
+            });
           },
         ),
         const SizedBox(height: 24),
@@ -83,7 +104,8 @@ class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
               : Column(
                   children: results.map((user) {
                     final isFriend = friendIds.contains(user.id);
-                    final isRequested = requestedIds.contains(user.id);
+                    final isRequested =
+                        user.friendRequests.contains(currentUserId);
                     final isSelf = user.id == currentUserId;
                     return Card(
                       color: theme.cardColor,
@@ -121,13 +143,18 @@ class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
                                     ),
                                   )
                                 : isRequested
-                                    ? const Text(
-                                        'Requested',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.orange,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    ? Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            'Requested',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.orange,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
                                       )
                                     : ElevatedButton(
                                         style: ElevatedButton.styleFrom(
@@ -146,9 +173,7 @@ class _SearchFriendsSectionState extends ConsumerState<SearchFriendsSection> {
                                                 .read(friendControllerProvider
                                                     .notifier)
                                                 .sendFriendRequest(user.id);
-                                            setState(() {
-                                              requestedIds.add(user.id);
-                                            });
+                                            setState(() {});
                                             if (mounted) {
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(SnackBar(

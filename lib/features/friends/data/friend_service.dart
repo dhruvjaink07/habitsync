@@ -30,7 +30,7 @@ class FriendService {
   // Remove a Friend
   Future<Response> removeFriend(String friendId) async {
     return await _dio.delete(
-      '/friends/remove',
+      '/friends/remove/$friendId',
     );
   }
 

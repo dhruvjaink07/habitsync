@@ -23,6 +23,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   User? _user;
+  bool showSharedStreak = false; // 1. Add this variable
 
   Future<void> _loadProfile() async {
     final user = await ProfileCacheService.getCachedUserProfile();
@@ -149,6 +150,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             );
           }
+          // Calculate streaks for personal and shared
+          const personalStreak = 7; // Replace with your logic
+          const sharedStreak = 3; // Replace with your logic
+
           return DefaultTabController(
             length: 3,
             child: Container(
@@ -160,10 +165,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(height: screenHeight * 0.1),
-                    StreakIndicator(
-                      screenHeigt: screenHeight,
-                      isDark: isDark,
-                      screenWidth: screenWidth,
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          showSharedStreak = !showSharedStreak;
+                        });
+                      },
+                      child: StreakIndicator(
+                        screenHeight: screenHeight,
+                        screenWidth: screenWidth,
+                        isDark: isDark,
+                        duration: Duration(minutes: 1),
+                        streakCount:
+                            showSharedStreak ? sharedStreak : personalStreak,
+                        onComplete: () {},
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      showSharedStreak
+                          ? "Shared Habits Streak"
+                          : "Personal Habits Streak",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     TabIndicator(isDark: isDark),

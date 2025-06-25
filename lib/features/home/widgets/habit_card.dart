@@ -23,7 +23,6 @@ class _HabitCardState extends State<HabitCard>
     with SingleTickerProviderStateMixin {
   bool isCompleted = false;
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -34,8 +33,6 @@ class _HabitCardState extends State<HabitCard>
       lowerBound: 0.0,
       upperBound: 1.0,
     );
-    _scaleAnimation =
-        CurvedAnimation(parent: _controller, curve: Curves.elasticOut);
   }
 
   @override
@@ -58,6 +55,8 @@ class _HabitCardState extends State<HabitCard>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode =
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
     final color =
         Color(int.parse(widget.habit.color.replaceFirst('#', '0xff')));
     return Padding(
@@ -95,7 +94,7 @@ class _HabitCardState extends State<HabitCard>
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
-                                    color: color)),
+                                    color: isDarkMode ? Colors.white : color)),
                             if (widget.habit.notes.isNotEmpty)
                               Text(widget.habit.notes,
                                   style: const TextStyle(fontSize: 14)),

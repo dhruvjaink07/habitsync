@@ -44,6 +44,8 @@ dependencies:
   flutter_easyloading: ^3.0.5
   image_picker: ^1.1.2
   cached_network_image: ^3.4.1
+  mobile_scanner: ^7.0.1
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:

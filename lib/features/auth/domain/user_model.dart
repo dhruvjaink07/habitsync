@@ -7,19 +7,20 @@ class User {
   final String bio;
   final int streak;
   final List<String> friends;
+  final List<String> friendRequests;
   final String joinedAt;
 
-  User({
-    required this.id,
-    required this.username,
-    required this.name,
-    required this.email,
-    required this.avatar,
-    required this.bio,
-    required this.streak,
-    required this.friends,
-    required this.joinedAt,
-  });
+  User(
+      {required this.id,
+      required this.username,
+      required this.name,
+      required this.email,
+      required this.avatar,
+      required this.bio,
+      required this.streak,
+      required this.friends,
+      required this.joinedAt,
+      this.friendRequests = const []});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -31,6 +32,8 @@ class User {
       bio: json['bio'] ?? '',
       streak: json['streak'] ?? 0,
       friends: (json['friends'] as List<dynamic>?)?.cast<String>() ?? [],
+      friendRequests:
+          (json['friendRequests'] as List<dynamic>?)?.cast<String>() ?? [],
       joinedAt: json['joinedAt'] ?? '',
     );
   }
@@ -46,6 +49,7 @@ class User {
       'streak': streak,
       'friends': friends,
       'joinedAt': joinedAt,
+      'friendRequests': friendRequests,
     };
   }
 

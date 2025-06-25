@@ -6,6 +6,7 @@ import 'package:habitsync/features/profile/widgets/action_button.dart';
 import 'package:habitsync/features/profile/widgets/friends_tab.dart';
 import 'package:habitsync/features/profile/widgets/habit_card_tab.dart';
 import 'package:habitsync/features/profile/widgets/stats_card.dart';
+import 'package:habitsync/features/profile/widgets/user_qr_widget.dart';
 import 'package:habitsync/features/settings/screen/settings_screen.dart';
 import 'package:habitsync/services/profile_cache_service.dart';
 import 'package:habitsync/features/auth/domain/user_model.dart';
@@ -310,6 +311,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ],
           ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('My QR Code'),
+                content: SizedBox(
+                  width: 220, // Set a fixed size for the QR code
+                  height: 220,
+                  child: UserQrCodeWidget(username: _user?.username ?? ''),
+                ),
+              ),
+            );
+          },
+          child: const Icon(Icons.qr_code),
         ),
       ),
     );

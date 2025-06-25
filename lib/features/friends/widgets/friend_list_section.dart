@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:habitsync/features/friends/controller/friend_controller.dart';
+import 'package:habitsync/features/friends/screen/friend_profile_screen.dart';
 
 class FriendsListSection extends ConsumerWidget {
   const FriendsListSection({super.key});
@@ -26,7 +27,8 @@ class FriendsListSection extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...friends.map((f) => Card(
+          ...friends.map(
+            (f) => Card(
                 color: theme.cardColor,
                 elevation: 0,
                 margin: const EdgeInsets.only(bottom: 12),
@@ -50,14 +52,48 @@ class FriendsListSection extends ConsumerWidget {
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: theme.hintColor),
                   ),
-                  trailing: IconButton(
-                    icon: Icon(Icons.more_vert, color: theme.iconTheme.color),
-                    onPressed: () {
-                      // Optionally show remove friend dialog
+                  trailing: MenuAnchor(
+                    builder: (BuildContext context, MenuController controller,
+                        Widget? child) {
+                      return IconButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        icon: const Icon(Icons.more_vert),
+                        tooltip: 'Show menu',
+                      );
                     },
+                    menuChildren: List<MenuItemButton>.generate(2, (index) {
+                      return MenuItemButton(
+                        onPressed: () {
+                          if (index == 0) {
+                            // Handle view profile
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => FriendProfileScreen(friend: f),
+                              ),
+                            );
+                          } else if (index == 1) {
+                            friendsAsync.whenData((friends) {
+                              ref
+                                  .read(friendControllerProvider.notifier)
+                                  .removeFriend(f.id);
+                            });
+                            print('Remove friend ${f.id}');
+                          }
+                        },
+                        child:
+                            Text(index == 0 ? 'View Profile' : 'Remove Friend'),
+                      );
+                    }),
                   ),
-                ),
-              )),
+                )),
+          )
         ],
       ),
     );
