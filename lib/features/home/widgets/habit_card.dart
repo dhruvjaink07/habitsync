@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:habitsync/core/utils/markHabitCompleteForToday.dart';
+import 'package:hive/hive.dart';
 import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/features/habits/domain/habit_model.dart';
+import 'package:habitsync/features/home/domain/pending_completion.dart';
 import 'package:habitsync/widgets/glass/glass_morphism.dart';
 
 class HabitCard extends StatefulWidget {
   final Habit habit;
   final double height;
-  final VoidCallback? onTap; // Add this
+  final VoidCallback? onTap;
+  final VoidCallback? onCompleted;
 
   const HabitCard({
     super.key,
     required this.habit,
     required this.height,
     this.onTap,
+    this.onCompleted, // Add this
   });
 
   @override
@@ -33,6 +38,11 @@ class _HabitCardState extends State<HabitCard>
       lowerBound: 0.0,
       upperBound: 1.0,
     );
+    isHabitCompletedToday(widget.habit.id).then((completed) {
+      setState(() {
+        isCompleted = completed;
+      });
+    });
   }
 
   @override
@@ -41,15 +51,66 @@ class _HabitCardState extends State<HabitCard>
     super.dispose();
   }
 
-  void markCompleted() {
+  void markCompleted() async {
     if (!isCompleted) {
       setState(() {
         isCompleted = true;
       });
       _controller.forward(from: 0.0);
+
+      // Store in Hive for offline sync
+      final pendingBox =
+          await Hive.openBox<PendingCompletion>('pendingCompletions');
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      final pending = PendingCompletion(
+        habitId: widget.habit.id,
+        date: today,
+        status: "complete",
+      );
+      await pendingBox.add(pending);
+
+      // Persist completion for today
+      await markHabitCompletedForToday(widget.habit.id);
+
+      // Determine streak type
+      final streakType =
+          widget.habit.sharedWith.isNotEmpty ? 'shared' : 'personal';
+
+      // Check if this is the first completion of this type today
+      final completedBox = await Hive.openBox('completedHabits');
+      final List completed = completedBox.get(today, defaultValue: <String>[]);
+
+      bool isFirstOfType = false;
+      if (streakType == 'personal') {
+        // Only count habits with sharedWith.isEmpty
+        final personalCompleted = completed.where((id) {
+          // You need to check if the habit with this id is personal
+          // For now, assume all are personal if you only have personal habits
+          // Or, if you have access to all habits, check their sharedWith
+          return true;
+        }).toList();
+        isFirstOfType = personalCompleted.length == 1;
+      } else {
+        // Only count habits with sharedWith.isNotEmpty
+        final sharedCompleted = completed.where((id) {
+          // Same as above, check if the habit is shared
+          return true;
+        }).toList();
+        isFirstOfType = sharedCompleted.length == 1;
+      }
+
+      if (isFirstOfType) {
+        await incrementStreakIfNeeded(streakType: streakType);
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${widget.habit.title} marked as completed!')),
       );
+
+      // Call the onCompleted callback if provided
+      if (widget.onCompleted != null) {
+        widget.onCompleted!();
+      }
     }
   }
 
@@ -62,9 +123,11 @@ class _HabitCardState extends State<HabitCard>
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
-        onTap: widget.onTap, // Add this
+        onTap: widget.onTap,
         onHorizontalDragEnd: (details) {
-          if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+          if (!isCompleted &&
+              details.primaryVelocity != null &&
+              details.primaryVelocity! > 0) {
             markCompleted();
           }
         },

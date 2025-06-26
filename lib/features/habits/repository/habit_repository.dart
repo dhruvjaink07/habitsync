@@ -59,4 +59,13 @@ class HabitRepository {
       rethrow;
     }
   }
+
+  Future<bool> markHabitAsDone(String habitId, String date) async {
+    try {
+      return await _habitService.markHabitComplete(
+          habitId: habitId, date: date);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

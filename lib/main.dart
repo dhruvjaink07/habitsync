@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/core/theme/theme.dart';
+import 'package:habitsync/features/home/domain/pending_completion.dart';
 import 'package:habitsync/features/onboarding/screens/splash_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(PendingCompletionAdapter());
   runApp(const ProviderScope(child: MyApp()));
   configLoading();
 }

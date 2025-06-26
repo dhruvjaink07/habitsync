@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habitsync/core/color/colors.dart';
 import 'package:habitsync/core/color/strings.dart';
+import 'package:habitsync/features/auth/controller/auth_controller.dart';
 import 'package:habitsync/features/auth/domain/user_model.dart';
 import 'package:habitsync/features/habits/controller/habit_controller.dart';
 import 'package:habitsync/features/habits/domain/habit_model.dart';
@@ -23,7 +25,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   User? _user;
-  bool showSharedStreak = false; // 1. Add this variable
+  bool showSharedStreak = false;
+  Timer? _midnightTimer;
 
   Future<void> _loadProfile() async {
     final user = await ProfileCacheService.getCachedUserProfile();
@@ -38,10 +41,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  Future<void> _refreshProfile() async {
+    await ref.read(authControllerProvider.notifier).refreshProfile();
+    final user = await ProfileCacheService.getCachedUserProfile();
+    setState(() {
+      _user = user;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _loadProfile();
+    _setupMidnightRefresh();
+  }
+
+  void _setupMidnightRefresh() {
+    final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final duration = tomorrow.difference(now);
+    _midnightTimer = Timer(duration, () {
+      setState(() {}); // Triggers UI refresh at midnight
+      _setupMidnightRefresh(); // Schedule next refresh
+    });
+  }
+
+  @override
+  void dispose() {
+    _midnightTimer?.cancel();
+    super.dispose();
   }
 
   void _navigateToAddHabit(BuildContext context) async {
@@ -150,9 +178,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             );
           }
-          // Calculate streaks for personal and shared
-          const personalStreak = 7; // Replace with your logic
-          const sharedStreak = 3; // Replace with your logic
+
+          // Get personal streak from user object
+          final personalStreak = _user?.streak ?? 0;
+
+          // Use the same streak for shared
+          final sharedStreak = _user?.streak ?? 0;
 
           return DefaultTabController(
             length: 3,
@@ -175,7 +206,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         screenHeight: screenHeight,
                         screenWidth: screenWidth,
                         isDark: isDark,
-                        duration: Duration(minutes: 1),
+                        duration: const Duration(days: 1),
                         streakCount:
                             showSharedStreak ? sharedStreak : personalStreak,
                         onComplete: () {},
@@ -204,6 +235,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               return HabitCard(
                                 habit: habit,
                                 height: screenHeight,
+                                onCompleted:
+                                    _refreshProfile, // Add this parameter
                                 onTap: () => _showHabitDialog(context, habit),
                               );
                             },
@@ -224,6 +257,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               return HabitCard(
                                 habit: habit,
                                 height: screenHeight,
+                                onCompleted:
+                                    _refreshProfile, // Add this parameter
                                 onTap: () => _showHabitDialog(context, habit),
                               );
                             },
@@ -244,6 +279,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               return HabitCard(
                                 habit: habit,
                                 height: screenHeight,
+                                onCompleted:
+                                    _refreshProfile, // Add this parameter
                                 onTap: () => _showHabitDialog(context, habit),
                               );
                             },

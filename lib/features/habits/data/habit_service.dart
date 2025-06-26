@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:habitsync/core/network/dio_service.dart';
 import 'package:habitsync/features/habits/domain/habit_model.dart';
+import 'package:hive/hive.dart';
+import 'package:habitsync/features/home/domain/pending_completion.dart';
 
 class HabitService {
   final Dio _dio = DioService().dio;
@@ -100,6 +102,63 @@ class HabitService {
     } catch (e) {
       print('Error fetching shared habits: $e');
       return [];
+    }
+  }
+
+  Future<bool> markHabitComplete({
+    required String habitId,
+    required String date,
+    String status = "complete",
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/progress',
+        data: {
+          "habitId": habitId,
+          "date": date,
+          "status": status,
+        },
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print('Failed to mark habit complete: ${response.data}');
+        return false;
+      }
+    } catch (e) {
+      print('Error marking habit complete: $e');
+      return false;
+    }
+  }
+
+  /// Call this periodically or on connectivity change
+  Future<void> syncPendingCompletions() async {
+    final box = await Hive.openBox<PendingCompletion>('pendingCompletions');
+    final List<PendingCompletion> pending = box.values.toList();
+
+    for (final entry in pending) {
+      final success = await markHabitComplete(
+        habitId: entry.habitId,
+        date: entry.date,
+        status: entry.status,
+      );
+      if (success) {
+        await entry.delete(); // Remove from Hive if synced
+      }
+    }
+  }
+
+  // Updating user streak
+  Future<void> incrementUserStreak() async {
+    try {
+      final response = await _dio.post('/progress/increment-streak');
+      if (response.statusCode == 200) {
+        print('Streak incremented successfully');
+      } else {
+        print('Failed to increment streak: ${response.data}');
+      }
+    } catch (e) {
+      print('Error incrementing user streak: $e');
     }
   }
 }

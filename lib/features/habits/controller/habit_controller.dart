@@ -83,4 +83,21 @@ class HabitController extends StateNotifier<AsyncValue<List<Habit>>> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> markHabits(String habitId, String date) async {
+    state = const AsyncValue.loading();
+    try {
+      final success = await _habitRepository.markHabitAsDone(habitId, date);
+      if (success) {
+        // Optionally refresh the habits list after marking as done
+        final ownerId = (await _habitRepository.getHabitById(habitId)).owner;
+        final habits = await _habitRepository.getHabitsByOwnerId(ownerId);
+        state = AsyncValue.data(habits);
+      } else {
+        print('Failed to mark habit as done');
+      }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
 }
