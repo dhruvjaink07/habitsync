@@ -89,20 +89,33 @@ class HabitService {
     }
   }
 
-  Future<List<Habit>> getSharedHabits(String userId) async {
+  Future<List<Habit>> getAllUserHabits(String userId) async {
     try {
       final response = await _dio.get('/habit/collaborative/$userId');
       if (response.statusCode == 200) {
-        final data = response.data as List;
-        return data.map((item) => Habit.fromJson(item)).toList();
+        final data = response.data;
+        List habits;
+        if (data is List) {
+          habits = data;
+        } else if (data is Map && data['data'] is List) {
+          habits = data['data'];
+        } else {
+          habits = [];
+        }
+        return habits.map((item) => Habit.fromJson(item)).toList();
       } else {
-        print('Failed to fetch shared habits: ${response.data}');
+        print('Failed to fetch user habits: ${response.data}');
         return [];
       }
     } catch (e) {
-      print('Error fetching shared habits: $e');
+      print('Error fetching user habits: $e');
       return [];
     }
+  }
+
+  // Alias for compatibility with repository/controller
+  Future<List<Habit>> getSharedHabits(String userId) async {
+    return getAllUserHabits(userId);
   }
 
   Future<bool> markHabitComplete({

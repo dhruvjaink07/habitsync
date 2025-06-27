@@ -68,4 +68,12 @@ class HabitRepository {
       rethrow;
     }
   }
+
+  Future<List<Habit>> getAllUserHabits(String userId) async {
+    try {
+      return await _habitService.getAllUserHabits(userId);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

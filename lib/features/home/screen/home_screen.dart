@@ -34,10 +34,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _user = user;
     });
     if (user != null) {
-      // Fetch habits for this user
+      // Fetch all habits for this user (owned and shared)
       await ref
           .read(habitControllerProvider.notifier)
-          .getHabitsByOwner(user.id);
+          .getAllUserHabits(user.id);
     }
   }
 
@@ -267,21 +267,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ListView.builder(
                             itemCount: habits
                                 .where((h) =>
-                                    h.sharedWith.isNotEmpty &&
-                                    h.owner == _user?.id)
+                                    (h.sharedWith.isNotEmpty &&
+                                        h.owner == _user?.id) ||
+                                    (h.sharedWith.contains(_user?.id)))
                                 .length,
                             itemBuilder: (context, index) {
                               final habit = habits
                                   .where((h) =>
-                                      h.sharedWith.isNotEmpty &&
-                                      h.owner == _user?.id)
+                                      (h.sharedWith.isNotEmpty &&
+                                          h.owner == _user?.id) ||
+                                      (h.sharedWith.contains(_user?.id)))
                                   .toList()[index];
-                              return HabitCard(
-                                habit: habit,
-                                height: screenHeight,
-                                onCompleted:
-                                    _refreshProfile, // Add this parameter
-                                onTap: () => _showHabitDialog(context, habit),
+                              return Column(
+                                children: [
+                                  HabitCard(
+                                    habit: habit,
+                                    height: screenHeight,
+                                    onCompleted: _refreshProfile,
+                                    onTap: () =>
+                                        _showHabitDialog(context, habit),
+                                  ),
+                                  // Show shared streak for this habit
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 16, bottom: 8),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.group,
+                                            size: 18, color: Colors.purple),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          "Shared Streak: ${habit.sharedStreak}",
+                                          style: TextStyle(
+                                            color: Colors.purple,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               );
                             },
                           ),

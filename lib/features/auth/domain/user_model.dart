@@ -6,6 +6,7 @@ class User {
   final String avatar;
   final String bio;
   final int streak;
+  final int sharedStreak;
   final List<String> friends;
   final List<String> friendRequests;
   final String joinedAt;
@@ -18,6 +19,7 @@ class User {
       required this.avatar,
       required this.bio,
       required this.streak,
+      required this.sharedStreak,
       required this.friends,
       required this.joinedAt,
       this.friendRequests = const []});
@@ -31,6 +33,7 @@ class User {
       avatar: json['avatar'] ?? '',
       bio: json['bio'] ?? '',
       streak: json['streak'] ?? 0,
+      sharedStreak: json['sharedStreak'] ?? 0,
       friends: (json['friends'] as List<dynamic>?)?.cast<String>() ?? [],
       friendRequests:
           (json['friendRequests'] as List<dynamic>?)?.cast<String>() ?? [],
@@ -47,6 +50,7 @@ class User {
       'avatar': avatar,
       'bio': bio,
       'streak': streak,
+      'sharedStreak': sharedStreak,
       'friends': friends,
       'joinedAt': joinedAt,
       'friendRequests': friendRequests,
@@ -61,6 +65,7 @@ class User {
     String? avatar,
     String? bio,
     int? streak,
+    int? sharedStreak,
     List<String>? friends,
     String? joinedAt,
   }) {
@@ -72,6 +77,7 @@ class User {
       avatar: avatar ?? this.avatar,
       bio: bio ?? this.bio,
       streak: streak ?? this.streak,
+      sharedStreak: sharedStreak ?? this.sharedStreak,
       friends: friends ?? this.friends,
       joinedAt: joinedAt ?? this.joinedAt,
     );

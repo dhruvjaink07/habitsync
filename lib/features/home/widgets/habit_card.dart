@@ -73,35 +73,24 @@ class _HabitCardState extends State<HabitCard>
       await markHabitCompletedForToday(widget.habit.id);
 
       // Determine streak type
-      final streakType =
-          widget.habit.sharedWith.isNotEmpty ? 'shared' : 'personal';
+      final isShared = widget.habit.sharedWith.isNotEmpty;
 
-      // Check if this is the first completion of this type today
-      final completedBox = await Hive.openBox('completedHabits');
-      final List completed = completedBox.get(today, defaultValue: <String>[]);
-
-      bool isFirstOfType = false;
-      if (streakType == 'personal') {
-        // Only count habits with sharedWith.isEmpty
+      // Only increment personal streak if this is the first personal completion today
+      if (!isShared) {
+        final completedBox = await Hive.openBox('completedHabits');
+        final List completed =
+            completedBox.get(today, defaultValue: <String>[]);
         final personalCompleted = completed.where((id) {
-          // You need to check if the habit with this id is personal
-          // For now, assume all are personal if you only have personal habits
-          // Or, if you have access to all habits, check their sharedWith
+          // If you only store personal habits in this list, this is fine
           return true;
         }).toList();
-        isFirstOfType = personalCompleted.length == 1;
-      } else {
-        // Only count habits with sharedWith.isNotEmpty
-        final sharedCompleted = completed.where((id) {
-          // Same as above, check if the habit is shared
-          return true;
-        }).toList();
-        isFirstOfType = sharedCompleted.length == 1;
+        final isFirstPersonal = personalCompleted.length == 1;
+        if (isFirstPersonal) {
+          await incrementStreakIfNeeded(streakType: 'personal');
+        }
       }
 
-      if (isFirstOfType) {
-        await incrementStreakIfNeeded(streakType: streakType);
-      }
+      // For shared streak, no need to increment locally; backend handles it
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${widget.habit.title} marked as completed!')),

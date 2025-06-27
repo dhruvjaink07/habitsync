@@ -25,11 +25,12 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  DateTime? _lastBackPressed;
 
   @override
   void initState() {
     super.initState();
-    setupConnectivitySync(); // Start connectivity sync listener
+    setupConnectivitySync();
   }
 
   void _onItemTapped(int index) {
@@ -38,12 +39,28 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Future<bool> _onWillPop() async {
+    if (_selectedIndex != 0) {
+      _onItemTapped(0);
+      return false;
+    }
+    final now = DateTime.now();
+    if (_lastBackPressed == null ||
+        now.difference(_lastBackPressed!) > const Duration(seconds: 2)) {
+      _lastBackPressed = now;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Press back again to exit')),
+      );
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Pass the callback to ProfileScreen
     final pages = [
       HomeScreen(
         onProfileTap: () => _onItemTapped(4),
@@ -61,12 +78,15 @@ class _MainScreenState extends State<MainScreen> {
       ),
     ];
 
-    return Scaffold(
-      body: pages[_selectedIndex],
-      bottomNavigationBar: AppBottomNavigationBar(
-        isDark: isDark,
-        selectedIndex: _selectedIndex,
-        onTap: _onItemTapped,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: pages[_selectedIndex],
+        bottomNavigationBar: AppBottomNavigationBar(
+          isDark: isDark,
+          selectedIndex: _selectedIndex,
+          onTap: _onItemTapped,
+        ),
       ),
     );
   }

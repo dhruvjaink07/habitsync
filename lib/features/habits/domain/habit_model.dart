@@ -7,6 +7,7 @@ class Habit {
   final String repeatPattern;
   final String color;
   final DateTime createdAt;
+  final int sharedStreak;
   final List<String> reminders;
 
   Habit({
@@ -18,6 +19,7 @@ class Habit {
     this.repeatPattern = 'daily',
     this.color = '#2196f3',
     DateTime? createdAt,
+    this.sharedStreak = 0,
     this.reminders = const [],
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -26,9 +28,9 @@ class Habit {
       id: json['_id'] ?? '',
       title: json['title'] ?? '',
       notes: json['notes'] ?? '',
-      owner: json['owner'] ?? '',
+      owner: json['owner'] is Map ? json['owner']['_id'] : json['owner'] ?? '',
       sharedWith: (json['sharedWith'] as List<dynamic>?)
-              ?.map((e) => e.toString())
+              ?.map((e) => e is Map ? e['_id'].toString() : e.toString())
               .toList() ??
           [],
       repeatPattern: json['repeatPattern'] ?? 'daily',
@@ -36,6 +38,7 @@ class Habit {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
+      sharedStreak: json['sharedStreak'] ?? 0,
       reminders: (json['reminders'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
@@ -53,6 +56,7 @@ class Habit {
       'repeatPattern': repeatPattern,
       'color': color,
       'createdAt': createdAt.toIso8601String(),
+      'sharedStreak': sharedStreak,
       'reminders': reminders,
     };
   }
@@ -66,6 +70,7 @@ class Habit {
     String? repeatPattern,
     String? color,
     DateTime? createdAt,
+    int? sharedStreak,
     List<String>? reminders,
   }) {
     return Habit(
@@ -77,6 +82,7 @@ class Habit {
       repeatPattern: repeatPattern ?? this.repeatPattern,
       color: color ?? this.color,
       createdAt: createdAt ?? this.createdAt,
+      sharedStreak: sharedStreak ?? this.sharedStreak,
       reminders: reminders ?? this.reminders,
     );
   }

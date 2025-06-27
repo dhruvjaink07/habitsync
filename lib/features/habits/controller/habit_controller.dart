@@ -32,8 +32,6 @@ class HabitController extends StateNotifier<AsyncValue<List<Habit>>> {
     }
   }
 
-// ...existing code...
-
   Future<Habit?> getHabitById(String habitId) async {
     try {
       final habit = await _habitRepository.getHabitById(habitId);
@@ -43,8 +41,6 @@ class HabitController extends StateNotifier<AsyncValue<List<Habit>>> {
       return null;
     }
   }
-
-// ...existing code...
 
   Future<void> createHabit(Habit habit) async {
     state = const AsyncValue.loading();
@@ -96,6 +92,16 @@ class HabitController extends StateNotifier<AsyncValue<List<Habit>>> {
       } else {
         print('Failed to mark habit as done');
       }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> getAllUserHabits(String userId) async {
+    state = const AsyncValue.loading();
+    try {
+      final habits = await _habitRepository.getAllUserHabits(userId);
+      state = AsyncValue.data(habits);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
