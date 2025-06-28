@@ -20,38 +20,20 @@ Future<bool> isHabitCompletedToday(String habitId) async {
   return completed.contains(habitId);
 }
 
-Future<void> updateStreakIfNeeded({
-  required String streakType, // 'personal' or 'shared'
-  required bool hasCompletedToday,
-}) async {
-  final box = await Hive.openBox('streaks');
-  final today = DateTime.now().toIso8601String().substring(0, 10);
-  final lastUpdateKey = '${streakType}_lastUpdate';
-  final streakKey = '${streakType}_streak';
-
-  final lastUpdate = box.get(lastUpdateKey, defaultValue: '');
-  int streak = box.get(streakKey, defaultValue: 0);
-
-  if (lastUpdate != today && hasCompletedToday) {
-    streak += 1;
-    await box.put(streakKey, streak);
-    await box.put(lastUpdateKey, today);
-  }
-}
-
-Future<int> getStreak(String streakType) async {
-  final box = await Hive.openBox('streaks');
-  return box.get('${streakType}_streak', defaultValue: 0);
-}
+// Removed local streak logic - using backend API only
 
 Future<void> incrementStreakIfNeeded({required String streakType}) async {
-  final box = await Hive.openBox('streaks');
+  final box = await Hive.openBox('streakIncrements');
   final today = DateTime.now().toIso8601String().substring(0, 10);
   final lastUpdateKey = '${streakType}_lastIncrement';
 
   final lastUpdate = box.get(lastUpdateKey, defaultValue: '');
   if (lastUpdate != today) {
+    print('Incrementing $streakType streak for $today');
     await HabitService().incrementUserStreak();
     await box.put(lastUpdateKey, today);
+    print('Streak increment API called successfully');
+  } else {
+    print('$streakType streak already incremented today ($today)');
   }
 }

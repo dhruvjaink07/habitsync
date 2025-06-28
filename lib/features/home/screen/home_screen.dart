@@ -177,13 +177,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             );
-          }
-
-          // Get personal streak from user object
+          } // Get personal streak from user object
           final personalStreak = _user?.streak ?? 0;
 
-          // Use the same streak for shared
-          final sharedStreak = _user?.streak ?? 0;
+          // Calculate shared streak from shared habits
+          final sharedHabits =
+              habits.where((h) => h.sharedWith.isNotEmpty).toList();
+          final sharedStreak = sharedHabits.isNotEmpty
+              ? sharedHabits
+                  .map((h) => h.sharedStreak)
+                  .reduce((a, b) => a > b ? a : b)
+              : 0;
 
           return DefaultTabController(
             length: 3,

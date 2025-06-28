@@ -174,14 +174,34 @@ class _HabitCardState extends State<HabitCard>
                     const SizedBox(height: 12),
                     Visibility(
                       visible: widget.habit.sharedWith.isNotEmpty,
-                      child: const Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          "Shared",
-                          style: TextStyle(
-                              color: AppColors.readingColor,
-                              fontWeight: FontWeight.bold),
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.local_fire_department,
+                                color: AppColors.readingColor,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "${widget.habit.sharedStreak} day streak",
+                                style: const TextStyle(
+                                  color: AppColors.readingColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Text(
+                            "Shared",
+                            style: TextStyle(
+                                color: AppColors.readingColor,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
                     ),
                   ],
